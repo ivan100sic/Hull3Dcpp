@@ -24,3 +24,12 @@ T orientation(const point<T>& p, const point<T>& q, const point<T>& r, const poi
 	sum += a.z * (b.x * c.y - b.y * c.x);
 	return sum;
 }
+
+template<class T>
+bool collinear(const point<T>& p, const point<T>& q, const point<T>& r) {
+	point<T> a = q - p;
+	point<T> b = r - p;
+	return a.x * b.y == b.x * a.y
+		&& a.y * b.z == b.y * a.z
+		&& a.z * b.x == b.z * a.x;
+}
