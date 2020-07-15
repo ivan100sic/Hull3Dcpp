@@ -1,0 +1,31 @@
+#include "pch.h"
+#include "CppUnitTest.h"
+#include "../ConvexHull3D/point.h"
+
+using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+
+namespace ConvexHull3DUnitTests
+{
+	TEST_CLASS(PointUnitTests)
+	{
+	public:
+		
+		TEST_METHOD(PointOrientation1)
+		{
+			point<int> pts[4] = { {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
+			Assert::IsTrue(orientation(pts[0], pts[1], pts[2], pts[3]) > 0);
+		}
+
+		TEST_METHOD(PointOrientation2)
+		{
+			point<int> pts[4] = { {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, -1} };
+			Assert::IsTrue(orientation(pts[0], pts[1], pts[2], pts[3]) < 0);
+		}
+
+		TEST_METHOD(PointOrientation3)
+		{
+			point<int> pts[4] = { {1, 2, 3}, {5, 4, 4}, {4, 2, 9}, {2, 8, -16} };
+			Assert::IsTrue(orientation(pts[0], pts[1], pts[2], pts[3]) == 0);
+		}
+	};
+}
