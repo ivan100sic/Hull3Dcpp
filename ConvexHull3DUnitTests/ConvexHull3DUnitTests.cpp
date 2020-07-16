@@ -39,10 +39,30 @@ namespace ConvexHull3DUnitTests {
 	TEST_CLASS(HullGraphUnitTests) {
 	public:
 
-		TEST_METHOD(MakeTriangle) {
+		TEST_METHOD(MakeTriangleCompiles) {
 			point<int> pts[3] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14} };
 			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
 			Assert::IsTrue(!!f);
 		}
+
+		TEST_METHOD(InscribePointCompiles) {
+			point<int> pts[4] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14}, {0, 0, 0} };
+			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
+			std::shared_ptr<vertex<point<int>>> newPoint = inscribePoint(f, pts[3]);
+			Assert::IsTrue(!!f);
+			Assert::IsTrue(!!newPoint);
+		}
+
+		TEST_METHOD(RemoveEdgeCompiles) {
+			point<int> pts[4] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14}, {0, 0, 0} };
+			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
+			std::shared_ptr<vertex<point<int>>> newPoint = inscribePoint(f, pts[3]);
+			std::shared_ptr<face<point<int>>> newFace = removeEdge(newPoint->incidentEdge());
+			Assert::IsTrue(!!f);
+			Assert::IsTrue(!!newPoint);
+			Assert::IsTrue(!!newFace);
+		}
 	};
+
+
 }
