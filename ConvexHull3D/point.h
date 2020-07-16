@@ -13,6 +13,11 @@ struct point {
 	}
 };
 
+/*
+ * Returns a positive value if the four points given in this order are in normal order, a negative
+ * value if they are in antinormal order, and zero if they are coplanar.
+ * The template parameter T should be a numeric data type.
+ */
 template<class T>
 T orientation(const point<T>& p, const point<T>& q, const point<T>& r, const point<T>& s) {
 	T sum {};
@@ -25,6 +30,10 @@ T orientation(const point<T>& p, const point<T>& q, const point<T>& r, const poi
 	return sum;
 }
 
+/*
+ * Returns true if the three given points lie on a single line, and false otherwise.
+ * The template parameter T should be a numeric data type.
+ */
 template<class T>
 bool collinear(const point<T>& p, const point<T>& q, const point<T>& r) {
 	point<T> a = q - p;
