@@ -15,10 +15,10 @@ namespace hullgraph {
 	class edge;
 
 	template<class T>
-	std::shared_ptr<face<T>> makeTriangle(const T& dataA, const T& dataB, const T& dataC);
+	std::shared_ptr<face<T>> makePolygon(const std::vector<T>& data);
 
 	template<class T>
-	std::shared_ptr<vertex<T>> inscribePoint(std::shared_ptr<face<T>> oldFace, const T& data);
+	std::shared_ptr<vertex<T>> inscribeVertex(std::shared_ptr<face<T>> oldFace, const T& data);
 
 	template<class T>
 	std::shared_ptr<face<T>> removeEdge(std::shared_ptr<edge<T>> halfEdge);
@@ -68,8 +68,8 @@ namespace hullgraph {
 			m_incidentFace = nullptr;
 		}
 
-		friend std::shared_ptr<face<T>> makeTriangle<T>(const T& dataA, const T& dataB, const T& dataC);
-		friend std::shared_ptr<vertex<T>> inscribePoint<T>(std::shared_ptr<face<T>> oldFace, const T& data);
+		friend std::shared_ptr<face<T>> makePolygon<T>(const std::vector<T>& data);
+		friend std::shared_ptr<vertex<T>> inscribeVertex<T>(std::shared_ptr<face<T>> oldFace, const T& data);
 		friend std::shared_ptr<face<T>> removeEdge<T>(std::shared_ptr<edge<T>> halfEdge);
 	};
 
@@ -90,8 +90,8 @@ namespace hullgraph {
 			m_incidentEdge = nullptr;
 		}
 
-		friend std::shared_ptr<face<T>> makeTriangle<T>(const T& dataA, const T& dataB, const T& dataC);
-		friend std::shared_ptr<vertex<T>> inscribePoint<T>(std::shared_ptr<face<T>> oldFace, const T& data);
+		friend std::shared_ptr<face<T>> makePolygon<T>(const std::vector<T>& data);
+		friend std::shared_ptr<vertex<T>> inscribeVertex<T>(std::shared_ptr<face<T>> oldFace, const T& data);
 		friend std::shared_ptr<face<T>> removeEdge<T>(std::shared_ptr<edge<T>> halfEdge);
 	};
 
@@ -107,8 +107,8 @@ namespace hullgraph {
 			m_outerComponent = nullptr;
 		}
 
-		friend std::shared_ptr<face<T>> makeTriangle<T>(const T& dataA, const T& dataB, const T& dataC);
-		friend std::shared_ptr<vertex<T>> inscribePoint<T>(std::shared_ptr<face<T>> oldFace, const T& data);
+		friend std::shared_ptr<face<T>> makePolygon<T>(const std::vector<T>& data);
+		friend std::shared_ptr<vertex<T>> inscribeVertex<T>(std::shared_ptr<face<T>> oldFace, const T& data);
 		friend std::shared_ptr<face<T>> removeEdge<T>(std::shared_ptr<edge<T>> halfEdge);
 	};
 
@@ -117,60 +117,20 @@ namespace hullgraph {
 	 */
 	template<class T>
 	std::shared_ptr<face<T>> makeTriangle(const T& dataA, const T& dataB, const T& dataC) {
-		std::shared_ptr<vertex<T>> a = std::make_shared<vertex<T>>();
-		std::shared_ptr<vertex<T>> b = std::make_shared<vertex<T>>();
-		std::shared_ptr<vertex<T>> c = std::make_shared<vertex<T>>();
+		return makePolygon(std::vector<T>{ dataA, dataB, dataC });
+	}
 
-		if (!a || !b || !c) {
+	/*
+	 * Returns the inner face of a polygon containing the given data labels, in normal order.
+	 * Returns null if given fewer than three labels.
+	 */
+	template<class T>
+	std::shared_ptr<face<T>> makePolygon(const std::vector<T>& data) {
+		size_t degree = data.size();
+		
+		if (degree < 3) {
 			return nullptr;
 		}
-
-		a->m_data = dataA;
-		b->m_data = dataB;
-		c->m_data = dataC;
-
-		std::shared_ptr<edge<T>> ab = std::make_shared<edge<T>>();
-		std::shared_ptr<edge<T>> bc = std::make_shared<edge<T>>();
-		std::shared_ptr<edge<T>> ca = std::make_shared<edge<T>>();
-		std::shared_ptr<edge<T>> ba = std::make_shared<edge<T>>();
-		std::shared_ptr<edge<T>> cb = std::make_shared<edge<T>>();
-		std::shared_ptr<edge<T>> ac = std::make_shared<edge<T>>();
-
-		if (!ab || !bc || !ca || !ba || !cb || !ac) {
-			return nullptr;
-		}
-
-		ab->m_origin = a;
-		bc->m_origin = b;
-		ca->m_origin = c;
-		ba->m_origin = b;
-		cb->m_origin = c;
-		ac->m_origin = a;
-
-		ab->m_twin = ba;
-		bc->m_twin = cb;
-		ca->m_twin = ac;
-		ba->m_twin = ab;
-		cb->m_twin = bc;
-		ac->m_twin = ca;
-
-		ab->m_next = bc;
-		bc->m_next = ca;
-		ca->m_next = ab;
-		ba->m_next = ac;
-		ac->m_next = cb;
-		cb->m_next = ba;
-
-		ab->m_prev = ca;
-		bc->m_prev = ab;
-		ca->m_prev = bc;
-		ba->m_prev = cb;
-		ac->m_prev = ba;
-		cb->m_prev = ac;
-
-		a->m_incidentEdge = ab;
-		b->m_incidentEdge = bc;
-		c->m_incidentEdge = ca;
 
 		std::shared_ptr<face<T>> innerFace = std::make_shared<face<T>>();
 		std::shared_ptr<face<T>> outerFace = std::make_shared<face<T>>();
@@ -179,19 +139,51 @@ namespace hullgraph {
 			return nullptr;
 		}
 
-		innerFace->m_outerComponent = ab;
-		outerFace->m_outerComponent = ba;
+		std::vector<std::shared_ptr<vertex<T>>> vertices(degree);
+		std::vector<std::shared_ptr<edge<T>>> forwardEdges(degree);
+		std::vector<std::shared_ptr<edge<T>>> backwardEdges(degree);
 
-		ab->m_incidentFace = innerFace;
-		bc->m_incidentFace = innerFace;
-		ca->m_incidentFace = innerFace;
-		ba->m_incidentFace = outerFace;
-		cb->m_incidentFace = outerFace;
-		ac->m_incidentFace = outerFace;
+		for (size_t i = 0; i < degree; i++) {
+			vertices[i] = std::make_shared<vertex<T>>();
+			forwardEdges[i] = std::make_shared<edge<T>>();
+			backwardEdges[i] = std::make_shared<edge<T>>();
+			if (!vertices[i] || !forwardEdges[i] || !backwardEdges[i]) {
+				return nullptr;
+			}
+		}
+
+		for (size_t i = 0; i < degree; i++) {
+			size_t iPrev = i == 0 ? degree - 1 : i - 1;
+			size_t iNext = i == degree - 1 ? 0 : i + 1;
+
+			vertices[i]->m_data = data[i];
+			vertices[i]->m_incidentEdge = forwardEdges[i];
+
+			forwardEdges[i]->m_origin = vertices[i];
+			backwardEdges[i]->m_origin = vertices[iNext];
+			
+			forwardEdges[i]->m_twin = backwardEdges[i];
+			backwardEdges[i]->m_twin = forwardEdges[i];
+
+			forwardEdges[i]->m_next = forwardEdges[iNext];
+			backwardEdges[i]->m_next = backwardEdges[iPrev];
+
+			forwardEdges[i]->m_prev = forwardEdges[iPrev];
+			backwardEdges[i]->m_prev = backwardEdges[iNext];
+
+			forwardEdges[i]->m_incidentFace = innerFace;
+			backwardEdges[i]->m_incidentFace = outerFace;
+		}
+
+		innerFace->m_outerComponent = forwardEdges[0];
+		outerFace->m_outerComponent = backwardEdges[0];
 
 		return innerFace;
 	}
 	
+	/*
+	 * Returns the list of all half-edges of the given face, in normal order.
+	 */
 	template<class T>
 	std::vector<std::shared_ptr<edge<T>>> faceToEdgeList(std::shared_ptr<face<T>> theFace) {
 		if (!theFace) {
@@ -215,12 +207,37 @@ namespace hullgraph {
 	}
 
 	/*
+	 * Returns the list of all half-edges exiting the given vertex, in normal order.
+	 */
+	template<class T>
+	std::vector<std::shared_ptr<edge<T>>> adjacentEdges(std::shared_ptr<vertex<T>> theVertex) {
+		if (!theVertex) {
+			return {};
+		}
+
+		std::vector<std::shared_ptr<edge<T>>> edges;
+		std::shared_ptr<edge<T>> startEdge = theVertex->incidentEdge();
+		std::shared_ptr<edge<T>> currEdge = startEdge;
+
+		do {
+			if (!currEdge) {
+				return {};
+			}
+
+			edges.push_back(currEdge);
+			currEdge = currEdge->prev()->twin();
+		} while (currEdge != startEdge);
+
+		return edges;
+	}
+
+	/*
 	 * Adds a new vertex and connects it to all the vertices of the old face.
 	 * This invalidates the reference to the old face.
 	 * Returns a pointer to the newly created vertex.
 	 */
 	template<class T>
-	std::shared_ptr<vertex<T>> inscribePoint(std::shared_ptr<face<T>> oldFace, const T& data) {
+	std::shared_ptr<vertex<T>> inscribeVertex(std::shared_ptr<face<T>> oldFace, const T& data) {
 		std::vector<std::shared_ptr<edge<T>>> edges = faceToEdgeList(oldFace);
 		size_t degree = edges.size();
 
@@ -261,7 +278,7 @@ namespace hullgraph {
 
 			newEdgesFrom[i]->m_next = edges[i];
 			newEdgesFrom[i]->m_prev = newEdgesTo[iNext];
-			newEdgesTo[i]->m_next = newEdgesTo[iPrev];
+			newEdgesTo[i]->m_next = newEdgesFrom[iPrev];
 			newEdgesTo[i]->m_prev = edges[iPrev];
 
 			newEdgesFrom[i]->m_incidentFace = newFaces[i];
@@ -282,7 +299,7 @@ namespace hullgraph {
 	}
 
 	/*
-	 * Given a half-edge, removes an edge from the graph. The result is undefined if one of the
+	 * Given a half-edge, removes that edge from the graph. The result is undefined if one of the
 	 * endpoints of the edge has degree 2. Returns a pointer to the newly created face.
 	 */
 	template<class T>
@@ -310,22 +327,18 @@ namespace hullgraph {
 
 		newFace->m_outerComponent = fromU;
 
-		for (auto& upperFaceEdge : upperFaceEdges) {
+		for (std::shared_ptr<edge<T>>& upperFaceEdge : upperFaceEdges) {
 			upperFaceEdge->m_incidentFace = newFace;
 		}
 
-		for (auto& upperFaceEdge : lowerFaceEdges) {
-			upperFaceEdge->m_incidentFace = newFace;
+		for (std::shared_ptr<edge<T>>& lowerFaceEdge : lowerFaceEdges) {
+			lowerFaceEdge->m_incidentFace = newFace;
 		}
 
 		fromU->m_prev = toU;
-		fromU->m_twin->m_next = toU->m_twin;
 		toU->m_next = fromU;
-		toU->m_twin->m_prev = fromU->m_twin;
 		toV->m_next = fromV;
-		toV->m_twin->m_prev = fromV->m_twin;
 		fromV->m_prev = toV;
-		fromV->m_twin->m_next = toV->m_twin;
 
 		u->m_incidentEdge = fromU;
 		v->m_incidentEdge = fromV;

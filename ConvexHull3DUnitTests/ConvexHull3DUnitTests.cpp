@@ -48,19 +48,30 @@ namespace ConvexHull3DUnitTests {
 		TEST_METHOD(InscribePointCompiles) {
 			point<int> pts[4] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14}, {0, 0, 0} };
 			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
-			std::shared_ptr<vertex<point<int>>> newPoint = inscribePoint(f, pts[3]);
+			std::shared_ptr<vertex<point<int>>> newPoint = inscribeVertex(f, pts[3]);
 			Assert::IsTrue(!!f);
 			Assert::IsTrue(!!newPoint);
 		}
 
-		TEST_METHOD(RemoveEdgeCompiles) {
-			point<int> pts[4] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14}, {0, 0, 0} };
+		TEST_METHOD(FaceToEdgeListTriangle) {
+			point<int> pts[3] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14} };
 			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
-			std::shared_ptr<vertex<point<int>>> newPoint = inscribePoint(f, pts[3]);
-			std::shared_ptr<face<point<int>>> newFace = removeEdge(newPoint->incidentEdge());
-			Assert::IsTrue(!!f);
-			Assert::IsTrue(!!newPoint);
+			Assert::IsTrue(faceToEdgeList(f).size() == 3);
+		}
+
+		TEST_METHOD(InscribePointAppearsToWork) {
+			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
+			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			std::vector<std::shared_ptr<edge<int>>> newPointEdges = adjacentEdges(newPoint);
+			Assert::AreEqual(3, (int)newPointEdges.size());
+		}
+
+		TEST_METHOD(RemoveEdgeCompilesAndAppearsToWork) {
+			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
+			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			std::shared_ptr<face<int>> newFace = removeEdge(newPoint->incidentEdge());
 			Assert::IsTrue(!!newFace);
+			Assert::AreEqual(4, (int)faceToEdgeList(newFace).size());
 		}
 	};
 
