@@ -21,5 +21,8 @@
     <ClInclude Include="hullgraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hull3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

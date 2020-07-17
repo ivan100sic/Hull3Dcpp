@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "../ConvexHull3D/point.h"
 #include "../ConvexHull3D/hullgraph.h"
+#include "../ConvexHull3D/hull3d.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace hullgraph;
@@ -72,6 +73,16 @@ namespace ConvexHull3DUnitTests {
 			std::shared_ptr<face<int>> newFace = removeEdge(newPoint->incidentEdge());
 			Assert::IsTrue(!!newFace);
 			Assert::AreEqual(4, (int)faceToEdgeList(newFace).size());
+		}
+	};
+
+	TEST_CLASS(Hull3DUnitTests) {
+	public:
+
+		TEST_METHOD(ComputeConvexHull3DCompiles) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			Assert::IsTrue(!!hullVertex);
 		}
 	};
 

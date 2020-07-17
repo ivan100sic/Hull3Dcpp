@@ -350,4 +350,3 @@ namespace hullgraph {
 		return newFace;
 	}
 }
-
