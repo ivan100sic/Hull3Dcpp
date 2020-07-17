@@ -45,7 +45,7 @@ namespace hullgraph {
 		}
 
 		std::shared_ptr<edge<T>> twin() const {
-			return m_next;
+			return m_twin;
 		}
 		
 		std::shared_ptr<edge<T>> next() const {
@@ -250,8 +250,6 @@ namespace hullgraph {
 			return nullptr;
 		}
 
-		newVertex->m_data = data;
-
 		std::vector<std::shared_ptr<edge<T>>> newEdgesFrom(degree);
 		std::vector<std::shared_ptr<edge<T>>> newEdgesTo(degree);
 		std::vector<std::shared_ptr<face<T>>> newFaces(degree);
@@ -291,6 +289,7 @@ namespace hullgraph {
 			edges[i]->m_incidentFace = newFaces[i];
 		}
 		
+		newVertex->m_data = data;
 		newVertex->m_incidentEdge = newEdgesFrom[0];
 
 		oldFace->invalidate();
