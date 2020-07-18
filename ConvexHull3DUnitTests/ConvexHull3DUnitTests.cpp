@@ -74,6 +74,22 @@ namespace ConvexHull3DUnitTests {
 			Assert::IsTrue(!!newFace);
 			Assert::AreEqual(4, (int)faceToEdgeList(newFace).size());
 		}
+
+		TEST_METHOD(JoinFacesCompilesAndAppearsToWork) {
+			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
+			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			std::vector<std::shared_ptr<face<int>>> faces = {
+				newPoint->incidentEdge()->incidentFace(),
+				newPoint->incidentEdge()->twin()->incidentFace()
+			};
+
+			join_faces_result<int> result = joinFaces(faces);
+
+			Assert::IsTrue(!!result.newFace);
+			Assert::AreEqual(0, (int)result.removedVertices.size());
+			Assert::AreEqual(2, (int)result.removedEdges.size());
+			Assert::AreEqual(4, (int)faceToEdgeList(result.newFace).size());
+		}
 	};
 
 	TEST_CLASS(Hull3DUnitTests) {
