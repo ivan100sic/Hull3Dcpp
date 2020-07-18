@@ -89,6 +89,8 @@ namespace ConvexHull3DUnitTests {
 			Assert::AreEqual(0, (int)result.removedVertices.size());
 			Assert::AreEqual(2, (int)result.removedEdges.size());
 			Assert::AreEqual(4, (int)faceToEdgeList(result.newFace).size());
+			Assert::AreEqual(4, (int)result.borderEdges.size());
+			Assert::AreEqual(4, (int)result.borderFaces.size());
 		}
 	};
 
