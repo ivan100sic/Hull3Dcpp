@@ -205,8 +205,9 @@ namespace hullgraph {
 
 	/*
 	 * Joins a set of faces with a common outside border. Returns a struct describing
- 	 * the removed vertices and edges (all invalidated) and the newly created face. The
-     * behavior is undefined if the faces don't have a common outside border.
+ 	 * the removed vertices and edges (all invalidated), the newly created face, the vector
+	 * listing the outside border edges and a vector containing corresponding removed faces,
+	 * one for each edge. The behavior is undefined if the faces don't have a common outside border.
 	 */
 	template<class T>
 	join_faces_result<T> joinFaces(const std::vector<std::shared_ptr<face<T>>>& faces) {
