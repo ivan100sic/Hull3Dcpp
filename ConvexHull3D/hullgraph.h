@@ -502,9 +502,11 @@ namespace hullgraph {
 
 		static std::shared_ptr<edge<T>> removeRedundantVertex(const std::shared_ptr<vertex<T>>& theVertex) {
 			std::shared_ptr<edge<T>> outEdge1 = theVertex->incidentEdge();
-			std::shared_ptr<edge<T>> outEdge2 = outEdge1->twin()->next();
+			std::shared_ptr<edge<T>> outEdge1twin = outEdge1->twin();
+			std::shared_ptr<edge<T>> outEdge2 = outEdge1twin->next();
+			std::shared_ptr<edge<T>> outEdge2twin = outEdge2->twin();
 
-			if (outEdge2->twin()->next() != outEdge1) {
+			if (outEdge2twin->next() != outEdge1) {
 				// The degree is at least 3
 				return nullptr;
 			}
@@ -518,8 +520,8 @@ namespace hullgraph {
 
 			std::shared_ptr<edge<T>> nextEdge1 = outEdge1->next();
 			std::shared_ptr<edge<T>> nextEdge2 = outEdge2->next();
-			std::shared_ptr<edge<T>> prevEdge1 = outEdge1->twin()->prev();
-			std::shared_ptr<edge<T>> prevEdge2 = outEdge2->twin()->prev();
+			std::shared_ptr<edge<T>> prevEdge1 = outEdge1twin->prev();
+			std::shared_ptr<edge<T>> prevEdge2 = outEdge2twin->prev();
 
 			// Set up the new edge pair
 
@@ -554,6 +556,12 @@ namespace hullgraph {
 
 			// Invalidate the vertex
 			theVertex->invalidate();
+
+			// Invalidate the old edges
+			outEdge1->invalidate();
+			outEdge1twin->invalidate();
+			outEdge2->invalidate();
+			outEdge2twin->invalidate();
 
 			return newEdge;
 		}
