@@ -113,6 +113,8 @@ namespace hullgraph {
 		std::vector<std::shared_ptr<vertex<T>>> removedVertices;
 		std::vector<std::shared_ptr<edge<T>>> removedEdges;
 		std::shared_ptr<face<T>> newFace;
+		std::vector<std::shared_ptr<edge<T>>> borderEdges;
+		std::vector<std::shared_ptr<face<T>>> borderFaces;
 	};
 
 	/*
@@ -404,7 +406,7 @@ namespace hullgraph {
 			}
 
 			// The half-edges whose twins are not tagged form the border of the new face
-			std::vector<std::shared_ptr<edge<T>>> borderEdges;
+			std::vector<std::shared_ptr<edge<T>>>& borderEdges = result.borderEdges;
 			std::shared_ptr<edge<T>> startEdge;
 
 			// Find a starting edge
@@ -432,7 +434,8 @@ namespace hullgraph {
 				while (currEdge->twin()->m_tag == 1) {
 					currEdge = currEdge->twin()->next();
 				}
-				borderEdges.push_back(currEdge);
+				result.borderEdges.push_back(currEdge);
+				result.borderFaces.push_back(currEdge->incidentFace());
 			} while (currEdge != startEdge);
 
 			// We have the border, tag all the vertices on it
