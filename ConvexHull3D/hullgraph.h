@@ -214,6 +214,16 @@ namespace hullgraph {
 		return hullgraph_implementations<T>::joinFaces(faces);
 	}
 
+	/*
+	 * Removes a degree-2 node from the graph. Invalidates that node and its adjacent edges.
+	 * Adds and returns a new edge bridging that node. If the given node has degree more than two,
+	 * this function doesn't modify anything and returns null.
+	 */
+	template<class T>
+	std::shared_ptr<edge<T>> removeRedundantVertex(const std::shared_ptr<vertex<T>>& theVertex) {
+		return hullgraph_implementations<T>::removeRedundantVertex(theVertex);
+	}
+
 	template<class T>
 	struct hullgraph_implementations {
 
@@ -488,6 +498,64 @@ namespace hullgraph {
 			}
 
 			return result;
+		}
+
+		static std::shared_ptr<edge<T>> removeRedundantVertex(const std::shared_ptr<vertex<T>>& theVertex) {
+			std::shared_ptr<edge<T>> outEdge1 = theVertex->incidentEdge();
+			std::shared_ptr<edge<T>> outEdge2 = outEdge1->twin()->next();
+
+			if (outEdge2->twin()->next() != outEdge1) {
+				// The degree is at least 3
+				return nullptr;
+			}
+
+			std::shared_ptr<edge<T>> newEdge = std::make_shared<edge<T>>();
+			std::shared_ptr<edge<T>> twinEdge = std::make_shared<edge<T>>();
+
+			if (!newEdge || !twinEdge) {
+				return nullptr;
+			}
+
+			std::shared_ptr<edge<T>> nextEdge1 = outEdge1->next();
+			std::shared_ptr<edge<T>> nextEdge2 = outEdge2->next();
+			std::shared_ptr<edge<T>> prevEdge1 = outEdge1->twin()->prev();
+			std::shared_ptr<edge<T>> prevEdge2 = outEdge2->twin()->prev();
+
+			// Set up the new edge pair
+
+			newEdge->m_origin = nextEdge2->origin();
+			twinEdge->m_origin = nextEdge1->origin();
+
+			newEdge->m_twin = twinEdge;
+			twinEdge->m_twin = newEdge;
+
+			newEdge->m_next = nextEdge1;
+			twinEdge->m_next = nextEdge2;
+
+			newEdge->m_prev = prevEdge2;
+			twinEdge->m_prev = prevEdge1;
+
+			newEdge->m_incidentFace = outEdge1->incidentFace();
+			twinEdge->m_incidentFace = outEdge2->incidentFace();
+
+			// Restore vertex properties
+			newEdge->origin()->m_incidentEdge = newEdge;
+			twinEdge->origin()->m_incidentEdge = twinEdge;
+
+			// Restore face properties
+			newEdge->incidentFace()->m_outerComponent = newEdge;
+			twinEdge->incidentFace()->m_outerComponent = twinEdge;
+
+			// Restore edge properties
+			nextEdge1->m_prev = newEdge;
+			prevEdge1->m_next = twinEdge;
+			prevEdge2->m_next = newEdge;
+			nextEdge2->m_prev = twinEdge;
+
+			// Invalidate the vertex
+			theVertex->invalidate();
+
+			return newEdge;
 		}
 	};
 }
