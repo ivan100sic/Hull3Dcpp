@@ -100,6 +100,23 @@ namespace ConvexHull3DUnitTests {
 			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
 			Assert::IsTrue(!!hullVertex);
 		}
+
+		TEST_METHOD(VerifyConvexHullOrientation) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			point<int> pt = { 1, 1, 1 };
+			
+			std::vector<std::shared_ptr<edge<point<int>>>> faceEdges = faceToEdgeList(hullVertex->incidentEdge()->incidentFace());
+			std::vector<point<int>> facePoints(faceEdges.size());
+
+			Assert::AreEqual(3, (int)faceEdges.size());
+
+			for (size_t i = 0; i < 3; i++) {
+				facePoints[i] = faceEdges[i]->origin()->data();
+			}
+			
+			Assert::IsTrue(orientation(facePoints[0], facePoints[1], facePoints[2], pt) < 0);
+		}
 	};
 
 
