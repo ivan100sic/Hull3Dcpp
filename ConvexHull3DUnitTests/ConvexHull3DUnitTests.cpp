@@ -92,6 +92,26 @@ namespace ConvexHull3DUnitTests {
 			Assert::AreEqual(4, (int)result.borderEdges.size());
 			Assert::AreEqual(4, (int)result.borderFaces.size());
 		}
+
+		TEST_METHOD(RemoveRedundantVertexCompilesAndReturnsNull) {
+			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
+			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			std::shared_ptr<edge<int>> result = removeRedundantVertex(newPoint);
+
+			Assert::IsTrue(!result);
+		}
+
+		TEST_METHOD(RemoveRedundantVertexCompilesAndAppearsToWork) {
+			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
+			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			std::shared_ptr<edge<int>> someEdge = newPoint->incidentEdge();
+			std::shared_ptr<vertex<int>> otherPoint = someEdge->destination();
+			std::shared_ptr<face<int>> newFace = removeEdge(someEdge);
+			std::shared_ptr<edge<int>> bridge = removeRedundantVertex(otherPoint);
+
+			Assert::AreEqual(3, (int)faceToEdgeList(bridge->incidentFace()).size());
+			Assert::AreEqual(2, (int)faceToEdgeList(bridge->twin()->incidentFace()).size());
+		}
 	};
 
 	TEST_CLASS(Hull3DUnitTests) {
