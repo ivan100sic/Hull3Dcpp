@@ -154,7 +154,7 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 						auto mapIt = faceToPoints.find(interestingFace);
 						if (mapIt != faceToPoints.end()) {
 							for (size_t pointIdx : mapIt->second) {
-								if (facePointOrientation(newTriangle, points[pointIdx]) > F(0)) {
+								if (facePointOrientation(newTriangle, remainingPoints[pointIdx]) > F(0)) {
 									newConflicts.insert(pointIdx);
 								}
 							}
