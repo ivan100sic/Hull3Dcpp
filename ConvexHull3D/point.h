@@ -15,6 +15,10 @@ struct point {
 	bool operator!= (const point& b) const {
 		return x != b.x || y != b.y || z != b.z;
 	}
+
+	bool operator== (const point& b) const {
+		return x == b.x && y == b.y && z == b.z;
+	}
 };
 
 /*

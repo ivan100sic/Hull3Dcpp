@@ -215,6 +215,61 @@ namespace ConvexHull3DUnitTests {
 
 			Assert::AreEqual(6*numPoints - 12, (int)allEdges.size());
 		}
+
+		TEST_METHOD(Hull3DTetrahedron1) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {1, 1, 1} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+
+			Assert::AreEqual(12, (int)exploreGraph(hullVertex).size());
+		}
+
+		TEST_METHOD(Hull3DTetrahedron2) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {-100, -100, -100} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+
+			Assert::AreEqual(12, (int)allEdges.size());
+
+			for (const std::shared_ptr<edge<point<int>>>& theEdge : allEdges) {
+				if (theEdge->origin()->data() == point<int>{0, 0, 0}) {
+					Assert::Fail();
+				}
+			}
+		}
+
+		TEST_METHOD(Hull3DTetrahedron3) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {6, 6, 6} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+
+			Assert::AreEqual(18, (int)allEdges.size());
+		}
+
+		TEST_METHOD(Hull3DTriangularDipyramid1) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {6, 6, 6}, {7, 7, 7} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+
+			Assert::AreEqual(18, (int)allEdges.size());
+		}
+
+		TEST_METHOD(Hull3DTriangularDipyramid2) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10} };
+			for (int t = 6; t <= 100; t++) {
+				pts.push_back({ t, t, t });
+			}
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+
+			Assert::AreEqual(18, (int)allEdges.size());
+
+			for (const std::shared_ptr<edge<point<int>>>& theEdge : allEdges) {
+				point<int> thePoint = theEdge->origin()->data();
+				if (thePoint.x % 10 + thePoint.y % 10 + thePoint.z % 10 != 0) {
+					Assert::Fail();
+				}
+			}
+		}
 	};
 
 
