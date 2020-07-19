@@ -212,7 +212,7 @@ namespace hullgraph {
  	 * the removed vertices and edges (all invalidated), the newly created face, the vector
 	 * listing the outside border edges and a vector containing corresponding removed faces,
 	 * one for each edge. The behavior is undefined if the faces don't have a common outside border.
-	 * The returned face is guaranteed to have its outerComponent edge equal to borderEdges[0]
+	 * The returned face is guaranteed to have its outerComponent edge equal to borderEdges[0].
 	 */
 	template<class T>
 	join_faces_result<T> joinFaces(const std::vector<std::shared_ptr<face<T>>>& faces) {
@@ -471,13 +471,14 @@ namespace hullgraph {
 			std::shared_ptr<edge<T>> currEdge = startEdge;
 
 			do {
+				result.borderEdges.push_back(currEdge);
+				result.borderFaces.push_back(currEdge->incidentFace());
+
 				// Rotate until you find a border edge
 				currEdge = currEdge->next();
 				while (currEdge->twin()->m_tag == 1) {
 					currEdge = currEdge->twin()->next();
 				}
-				result.borderEdges.push_back(currEdge);
-				result.borderFaces.push_back(currEdge->incidentFace());
 			} while (currEdge != startEdge);
 
 			// We have the border, tag all the vertices on it

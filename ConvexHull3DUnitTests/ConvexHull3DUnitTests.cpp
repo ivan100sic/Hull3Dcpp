@@ -191,6 +191,30 @@ namespace ConvexHull3DUnitTests {
 			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
 			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
 		}
+
+		TEST_METHOD(Hull3DSphere) {
+			const int numPoints = 1000;
+			const double pi = acos(double(-1));
+			
+			std::vector<point<double>> pts(numPoints);
+			std::mt19937_64 randomEngine;
+			std::uniform_real_distribution<double> angleGen(0, pi);
+
+			for (int i = 0; i < numPoints; i++) {
+				double phi = 2 * angleGen(randomEngine);
+				double theta = angleGen(randomEngine) - pi / 2;
+				double x = cos(phi) * cos(theta);
+				double y = sin(phi) * cos(theta);
+				double z = sin(theta);
+
+				pts[i] = { x, y, z };
+			}
+
+			std::shared_ptr<vertex<point<double>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<double>>>> allEdges = exploreGraph(hullVertex);
+
+			Assert::AreEqual(6*numPoints - 12, (int)allEdges.size());
+		}
 	};
 
 
