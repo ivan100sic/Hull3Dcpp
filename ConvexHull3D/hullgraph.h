@@ -229,6 +229,32 @@ namespace hullgraph {
 		return hullgraph_implementations<T>::removeRedundantVertex(theVertex);
 	}
 
+	/*
+	 * Returns the list of all edges reachable from the given vertex.
+	 */
+	template<class T>
+	std::vector<std::shared_ptr<edge<T>>> exploreGraph(const std::shared_ptr<vertex<T>>& initialVertex) {
+		if (!initialVertex || !initialVertex->incidentEdge()) {
+			return {};
+		}
+
+		std::vector<std::shared_ptr<edge<T>>> edgesQueue = { initialVertex->incidentEdge() };
+		std::unordered_set<std::shared_ptr<edge<T>>> visitedEdges;
+
+		size_t queueStart = 0;
+		while (queueStart != edgesQueue.size()) {
+			std::shared_ptr<edge<T>> currEdge = edgesQueue[queueStart++];
+			for (const std::shared_ptr<edge<T>>& newEdge : { currEdge->twin(), currEdge->next(), currEdge->prev() }) {
+				if (visitedEdges.count(newEdge) == 0) {
+					visitedEdges.insert(newEdge);
+					edgesQueue.push_back(newEdge);
+				}
+			}
+		}
+
+		return edgesQueue;
+	}
+
 	template<class T>
 	struct hullgraph_implementations {
 
