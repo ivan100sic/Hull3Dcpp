@@ -147,7 +147,7 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 			throw 333;
 		}
 
-		if (pairsFound1 != pairsFound2) {
+		if (pairsFound2 != pairsFound3) {
 			throw 444;
 		}
 
