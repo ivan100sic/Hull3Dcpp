@@ -282,12 +282,12 @@ namespace hullgraph {
 				throw std::exception("There are null edges");
 			}
 
-			if (!e->twin() || !e->next() || !e->prev() || !e->outerComponent()) {
+			if (!e->twin() || !e->next() || !e->prev() || !e->incidentFace()) {
 				throw std::exception("Edge holds a null pointer");
 			}
 
 			allVertices.insert(e->origin());
-			allFaces.insert(e->outerComponent());
+			allFaces.insert(e->incidentFace());
 
 			if (e->twin()->twin() != e) {
 				throw std::exception("Edge's twin's twin is not the edge itself");
@@ -319,6 +319,10 @@ namespace hullgraph {
 
 			if (v->incidentEdge()->origin() != v) {
 				throw std::exception("Vertex's incident edge's origin is not the vertex itself");
+			}
+
+			if (adjacentEdges(v).size() < 2) {
+				throw std::exception("Vertex's degree is less than two");
 			}
 		}
 	}

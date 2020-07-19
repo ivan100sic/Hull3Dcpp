@@ -129,6 +129,7 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 				borderVertices[i] = joinResult.borderEdges[i]->origin();
 			}
 
+			validateGraph(peakVertex);
 			vertexptr newVertex = inscribeVertex(joinResult.newFace, remainingPoints[i]);
 			peakVertex = newVertex;
 			callback(convex_hull_update::afterInscribeVertex, peakVertex);
@@ -150,7 +151,11 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 				if (shouldMerge[j]) {
 					// Merge the two faces and adjust the conflict graph
 					faceptr adjacentFace = newVertexEdges[j]->next()->twin()->incidentFace();
+
+					validateGraph(peakVertex);
 					faceptr mergedFace = removeEdge(newVertexEdges[j]->next());
+					validateGraph(peakVertex); // failed here
+
 					std::swap(faceToPoints[mergedFace], faceToPoints[adjacentFace]);
 					faceToPoints.erase(adjacentFace);
 					for (size_t pointIdx : faceToPoints[mergedFace]) {
