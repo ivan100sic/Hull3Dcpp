@@ -47,7 +47,7 @@ namespace hullgraph {
 		std::shared_ptr<edge<T>> twin() const {
 			return m_twin;
 		}
-		
+
 		std::shared_ptr<edge<T>> next() const {
 			return m_next;
 		}
@@ -133,7 +133,7 @@ namespace hullgraph {
 	std::shared_ptr<face<T>> makePolygon(const std::vector<T>& data) {
 		return hullgraph_implementations<T>::makePolygon(data);
 	}
-	
+
 	/*
 	 * Returns the list of all half-edges of the given face, in normal order, starting
 	 * from the face's outerComponent() edge.
@@ -209,7 +209,7 @@ namespace hullgraph {
 
 	/*
 	 * Joins a set of faces with a common outside border. Returns a struct describing
- 	 * the removed vertices and edges (all invalidated), the newly created face, the vector
+	 * the removed vertices and edges (all invalidated), the newly created face, the vector
 	 * listing the outside border edges and a vector containing corresponding removed faces,
 	 * one for each edge. The behavior is undefined if the faces don't have a common outside border.
 	 * The returned face is guaranteed to have its outerComponent edge equal to borderEdges[0].
@@ -385,10 +385,10 @@ namespace hullgraph {
 			std::shared_ptr<vertex<T>> v = halfEdge->destination();
 
 			std::shared_ptr<edge<T>> twinEdge = halfEdge->twin();
-			std::shared_ptr<edge<T>> fromU = halfEdge->next();
-			std::shared_ptr<edge<T>> toU = twinEdge->prev();
-			std::shared_ptr<edge<T>> fromV = twinEdge->next();
-			std::shared_ptr<edge<T>> toV = halfEdge->prev();
+			std::shared_ptr<edge<T>> fromU = twinEdge->next();
+			std::shared_ptr<edge<T>> toU = halfEdge->prev();
+			std::shared_ptr<edge<T>> fromV = halfEdge->next();
+			std::shared_ptr<edge<T>> toV = twinEdge->prev();
 
 			std::shared_ptr<face<T>> upperFace = halfEdge->incidentFace();
 			std::shared_ptr<face<T>> lowerFace = twinEdge->incidentFace();
@@ -396,7 +396,7 @@ namespace hullgraph {
 			std::vector<std::shared_ptr<edge<T>>> upperFaceEdges = faceToEdgeList(upperFace);
 			std::vector<std::shared_ptr<edge<T>>> lowerFaceEdges = faceToEdgeList(lowerFace);
 
-			newFace->m_outerComponent = fromU;
+			newFace->m_outerComponent = fromV;
 
 			for (const std::shared_ptr<edge<T>>& upperFaceEdge : upperFaceEdges) {
 				upperFaceEdge->m_incidentFace = newFace;
