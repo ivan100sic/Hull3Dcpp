@@ -135,7 +135,8 @@ namespace hullgraph {
 	}
 	
 	/*
-	 * Returns the list of all half-edges of the given face, in normal order.
+	 * Returns the list of all half-edges of the given face, in normal order, starting
+	 * from the face's outerComponent() edge.
 	 */
 	template<class T>
 	std::vector<std::shared_ptr<edge<T>>> faceToEdgeList(const std::shared_ptr<face<T>>& theFace) {
@@ -160,7 +161,8 @@ namespace hullgraph {
 	}
 
 	/*
-	 * Returns the list of all half-edges exiting the given vertex, in normal order.
+	 * Returns the list of all half-edges exiting the given vertex, in normal order, starting
+	 * from the vertex's incidentEdge().
 	 */
 	template<class T>
 	std::vector<std::shared_ptr<edge<T>>> adjacentEdges(const std::shared_ptr<vertex<T>>& theVertex) {
@@ -188,6 +190,8 @@ namespace hullgraph {
 	 * Adds a new vertex and connects it to all the vertices of the old face.
 	 * This invalidates the reference to the old face.
 	 * Returns a pointer to the newly created vertex.
+	 * The returned vertex's incidentEdge is guaranteed to point to the origin
+	 * of oldFace's outerComponent edge.
 	 */
 	template<class T>
 	std::shared_ptr<vertex<T>> inscribeVertex(const std::shared_ptr<face<T>>& oldFace, const T& data) {
@@ -208,6 +212,7 @@ namespace hullgraph {
  	 * the removed vertices and edges (all invalidated), the newly created face, the vector
 	 * listing the outside border edges and a vector containing corresponding removed faces,
 	 * one for each edge. The behavior is undefined if the faces don't have a common outside border.
+	 * The returned face is guaranteed to have its outerComponent edge equal to borderEdges[0]
 	 */
 	template<class T>
 	join_faces_result<T> joinFaces(const std::vector<std::shared_ptr<face<T>>>& faces) {
