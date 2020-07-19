@@ -4,6 +4,8 @@
 #include "../ConvexHull3D/hullgraph.h"
 #include "../ConvexHull3D/hull3d.h"
 
+#include <set>
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace hullgraph;
 
@@ -112,6 +114,29 @@ namespace ConvexHull3DUnitTests {
 			Assert::AreEqual(3, (int)faceToEdgeList(bridge->incidentFace()).size());
 			Assert::AreEqual(2, (int)faceToEdgeList(bridge->twin()->incidentFace()).size());
 		}
+
+		TEST_METHOD(ExploreGraphCompilesAndAppearsToWork) {
+			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
+			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			std::vector<std::shared_ptr<edge<int>>> allEdges = exploreGraph(newPoint);
+
+			Assert::AreEqual(12, (int)allEdges.size());
+
+			std::set<std::pair<int, int>> pendingEdges;
+			for (int i = 0; i < 4; i++) {
+				for (int j = 0; j < 4; j++) {
+					if (i != j) {
+						pendingEdges.insert({ i, j });
+					}
+				}
+			}
+
+			for (const std::shared_ptr<edge<int>>& theEdge : allEdges) {
+				pendingEdges.erase({ theEdge->origin()->data(), theEdge->destination()->data() });
+			}
+
+			Assert::AreEqual(0, (int)pendingEdges.size());
+		}
 	};
 
 	TEST_CLASS(Hull3DUnitTests) {
@@ -138,6 +163,33 @@ namespace ConvexHull3DUnitTests {
 			}
 			
 			Assert::IsTrue(orientation(facePoints[0], facePoints[1], facePoints[2], pt) < 0);
+		}
+
+		TEST_METHOD(Hull3DCubeLattice) {
+			std::vector<point<int>> pts;
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					for (int k = 0; k < 10; k++) {
+						pts.push_back({ i, j, k });
+					}
+				}
+			}
+
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			Assert::AreEqual(24, (int)allEdges.size());
+		}
+
+		TEST_METHOD(Hull3DParaboloid) {
+			std::vector<point<int>> pts;
+			for (int i = 0; i < 30; i++) {
+				for (int j = 0; j < 30; j++) {
+					pts.push_back({ i, j, i*i+j*j });
+				}
+			}
+
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
 		}
 	};
 

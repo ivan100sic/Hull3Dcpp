@@ -239,7 +239,7 @@ namespace hullgraph {
 		}
 
 		std::vector<std::shared_ptr<edge<T>>> edgesQueue = { initialVertex->incidentEdge() };
-		std::unordered_set<std::shared_ptr<edge<T>>> visitedEdges;
+		std::unordered_set<std::shared_ptr<edge<T>>> visitedEdges = { initialVertex->incidentEdge() };
 
 		size_t queueStart = 0;
 		while (queueStart != edgesQueue.size()) {
