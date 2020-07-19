@@ -108,6 +108,49 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 
 	// Add the points
 	for (size_t i = 0; i < remainingPoints.size(); i++) {
+
+		// Integrity check
+		// Gather all faces
+		auto allEdges = exploreGraph(peakVertex);
+		std::unordered_set<faceptr> allFaces;
+		for (auto e : allEdges) {
+			allFaces.insert(e->incidentFace());
+		}
+
+		size_t pairsFound1 = 0;
+		size_t pairsFound2 = 0;
+		size_t pairsFound3 = 0;
+		for (auto f : allFaces) {
+			for (size_t id = 0; id < remainingPoints.size(); id++) {
+				if (facePointOrientation(f, remainingPoints[id]) > F(0)) {
+					pairsFound1++;
+					if (pointToFaces[id].count(f) == 0) {
+						throw 111;
+					}
+
+					if (std::find(faceToPoints[f].begin(), faceToPoints[f].end(), id) == faceToPoints[f].end()) {
+						throw 222;
+					}
+				}
+			}
+		}
+
+		for (auto f : faceToPoints) {
+			pairsFound2 += f.second.size();
+		}
+
+		for (auto f : pointToFaces) {
+			pairsFound3 += f.size();
+		}
+
+		if (pairsFound1 != pairsFound2) {
+			throw 333;
+		}
+
+		if (pairsFound1 != pairsFound2) {
+			throw 444;
+		}
+
 		if (pointToFaces[i].size()) {
 			std::vector<faceptr> faceSetToVector(pointToFaces[i].begin(), pointToFaces[i].end());
 			join_faces_result<point<F>> joinResult = joinFaces(faceSetToVector);
