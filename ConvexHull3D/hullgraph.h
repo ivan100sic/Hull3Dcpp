@@ -273,6 +273,57 @@ namespace hullgraph {
 	}
 
 	template<class T>
+	void validateGraph(const std::shared_ptr<vertex<T>>& initialVertex) {
+		auto allEdges = exploreGraph(initialVertex);
+		std::unordered_set<std::shared_ptr<vertex<T>>> allVertices;
+		std::unordered_set<std::shared_ptr<face<T>>> allFaces;
+		for (auto e : allEdges) {
+			if (!e) {
+				throw std::exception("There are null edges");
+			}
+
+			if (!e->twin() || !e->next() || !e->prev() || !e->outerComponent()) {
+				throw std::exception("Edge holds a null pointer");
+			}
+
+			allVertices.insert(e->origin());
+			allFaces.insert(e->outerComponent());
+
+			if (e->twin()->twin() != e) {
+				throw std::exception("Edge's twin's twin is not the edge itself");
+			}
+
+			if (e->next()->prev() != e) {
+				throw std::exception("Edge's next's prev is not the edge itself");
+			}
+
+			if (e->prev()->next() != e) {
+				throw std::exception("Edge's prev's next is not the edge itself");
+			}
+		}
+
+		for (auto f : allFaces) {
+			if (!f->outerComponent()) {
+				throw std::exception("Face holds a null pointer");
+			}
+
+			if (f->outerComponent()->incidentFace() != f) {
+				throw std::exception("Face's outer component's incident face is not the face itself");
+			}
+		}
+
+		for (auto v : allVertices) {
+			if (!v->incidentEdge()) {
+				throw std::exception("Vertex holds a null pointer");
+			}
+
+			if (v->incidentEdge()->origin() != v) {
+				throw std::exception("Vertex's incident edge's origin is not the vertex itself");
+			}
+		}
+	}
+
+	template<class T>
 	struct hullgraph_implementations {
 
 		static std::shared_ptr<face<T>> makePolygon(const std::vector<T>& data) {
