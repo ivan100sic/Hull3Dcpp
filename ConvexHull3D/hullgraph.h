@@ -255,6 +255,23 @@ namespace hullgraph {
 		return edgesQueue;
 	}
 
+	/*
+	 * Returns whether the given vertex has degree exactly two.
+	 */
+	template<class T>
+	bool hasDegreeTwo(const std::shared_ptr<vertex<T>>& theVertex) {
+		std::shared_ptr<edge<T>> firstEdge = theVertex->incidentEdge();
+		std::shared_ptr<edge<T>> secondEdge = firstEdge->twin()->next();
+
+		if (firstEdge == secondEdge) {
+			return false;
+		}
+
+		std::shared_ptr<edge<T>> thirdEdge = secondEdge->twin()->next();
+
+		return firstEdge == thirdEdge;
+	}
+
 	template<class T>
 	struct hullgraph_implementations {
 
@@ -383,6 +400,15 @@ namespace hullgraph {
 
 			std::shared_ptr<vertex<T>> u = halfEdge->origin();
 			std::shared_ptr<vertex<T>> v = halfEdge->destination();
+
+			// If u or v has degree two, first remove that vertex
+			if (hasDegreeTwo(u)) {
+				return removeEdge(removeRedundantVertex(u));
+			}
+
+			if (hasDegreeTwo(v)) {
+				return removeEdge(removeRedundantVertex(v));
+			}
 
 			std::shared_ptr<edge<T>> twinEdge = halfEdge->twin();
 			std::shared_ptr<edge<T>> fromU = twinEdge->next();

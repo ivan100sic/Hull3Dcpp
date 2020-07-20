@@ -181,7 +181,10 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 
 			// Delete vertices worth deleting. The conflict graph isn't changed.
 			for (const vertexptr& borderVertex : borderVertices) {
-				removeRedundantVertex(borderVertex);
+				// Some border vertices may have been deleted during face merger, skip them
+				if (borderVertex->incidentEdge()) {
+					removeRedundantVertex(borderVertex);
+				}
 			}
 		}
 	}
