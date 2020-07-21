@@ -82,6 +82,9 @@
     <ClInclude Include="hullgraph.h" />
     <ClInclude Include="point.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="perftest.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
