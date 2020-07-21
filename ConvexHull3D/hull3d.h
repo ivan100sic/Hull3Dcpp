@@ -7,10 +7,10 @@
 #include <chrono>
 #include <unordered_map>
 
-template<class F>
-F facePointOrientation(std::shared_ptr<hullgraph::face<point<F>>> theFace, const point<F>& thePoint) {
-	point<F> points[3];
-	std::shared_ptr<hullgraph::edge<point<F>>> walkingEdge = theFace->outerComponent();
+template<class Point>
+decltype(Point::x) facePointOrientation(std::shared_ptr<hullgraph::face<Point>> theFace, const Point& thePoint) {
+	Point points[3];
+	std::shared_ptr<hullgraph::edge<Point>> walkingEdge = theFace->outerComponent();
 	points[0] = walkingEdge->origin()->data();
 	walkingEdge = walkingEdge->next();
 	points[1] = walkingEdge->origin()->data();
@@ -18,7 +18,7 @@ F facePointOrientation(std::shared_ptr<hullgraph::face<point<F>>> theFace, const
 	return orientation(points[0], points[1], points[2], thePoint);
 }
 
-enum convex_hull_update : int {
+enum class convex_hull_update : char {
 	initialTetrahedron,
 	afterJoinFaces,
 	afterInscribeVertex,
@@ -26,15 +26,16 @@ enum convex_hull_update : int {
 	afterRemoveRedundantVertices,
 };
 
-template<class F, class Callback>
-std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vector<point<F>>& points, Callback callback) {
+template<class Point, class Callback>
+std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<Point>& points, Callback callback) {
 	using namespace hullgraph;
-	using vertexptr = std::shared_ptr<vertex<point<F>>>;
-	using edgeptr = std::shared_ptr<edge<point<F>>>;
-	using faceptr = std::shared_ptr<face<point<F>>>;
+	using F = decltype(Point::x);
+	using vertexptr = std::shared_ptr<vertex<Point>>;
+	using edgeptr = std::shared_ptr<edge<Point>>;
+	using faceptr = std::shared_ptr<face<Point>>;
 
-	std::vector<point<F>> firstFourPoints, remainingPoints;
-	for (const point<F>& point : points) {
+	std::vector<Point> firstFourPoints, remainingPoints;
+	for (const Point& point : points) {
 		switch (firstFourPoints.size()) {
 		case 0:
 			firstFourPoints.push_back(point);
@@ -120,7 +121,7 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 	for (size_t i = 0; i < remainingPoints.size(); i++) {
 		if (pointToFaces[i].size()) {
 			std::vector<faceptr> faceSetToVector(pointToFaces[i].begin(), pointToFaces[i].end());
-			join_faces_result<point<F>> joinResult = joinFaces(faceSetToVector);
+			join_faces_result<Point> joinResult = joinFaces(faceSetToVector);
 			callback(convex_hull_update::afterJoinFaces, peakVertex);
 
 			std::vector<vertexptr> borderVertices(joinResult.borderEdges.size());
@@ -208,8 +209,8 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 	return peakVertex;
 }
 
-template<class F>
-std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vector<point<F>>& points) {
-	return computeConvexHull3D(points, [](convex_hull_update, std::shared_ptr<hullgraph::vertex<point<F>>>) {});
+template<class Point>
+std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<Point> & points) {
+	return computeConvexHull3D(points, [](convex_hull_update, std::shared_ptr<hullgraph::vertex<Point>>) {});
 }
 

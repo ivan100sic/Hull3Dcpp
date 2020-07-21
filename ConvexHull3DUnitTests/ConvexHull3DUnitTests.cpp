@@ -37,6 +37,11 @@ namespace ConvexHull3DUnitTests {
 			point<int> pts[3] = { {0, 1, 2}, {4, 7, 10}, {7, 11, 15} };
 			Assert::IsFalse(collinear(pts[0], pts[1], pts[2]));
 		}
+
+		TEST_METHOD(LabeledPointCompiles) {
+			labeled_point<int, std::string> pts[3] = { {0, 1, 2, "one"}, {4, 7, 10, "two"}, {7, 11, 15, "three"} };
+			Assert::IsFalse(collinear(pts[0], pts[1], pts[2]));
+		}
 	};
 
 	TEST_CLASS(HullGraphUnitTests) {
