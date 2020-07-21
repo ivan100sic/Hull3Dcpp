@@ -10,7 +10,7 @@
 template<class F>
 F facePointOrientation(std::shared_ptr<hullgraph::face<point<F>>> theFace, const point<F>& thePoint) {
 	point<F> points[3];
-	std::shared_ptr<edge<point<F>>> walkingEdge = theFace->outerComponent();
+	std::shared_ptr<hullgraph::edge<point<F>>> walkingEdge = theFace->outerComponent();
 	points[0] = walkingEdge->origin()->data();
 	walkingEdge = walkingEdge->next();
 	points[1] = walkingEdge->origin()->data();
