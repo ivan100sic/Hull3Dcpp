@@ -13,7 +13,6 @@ ConvexHullSceneRenderer::ConvexHullSceneRenderer(const std::shared_ptr<DX::Devic
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
-	m_tracking(false),
 	m_deviceResources(deviceResources)
 {
 	CreateDeviceDependentResources();
@@ -68,15 +67,12 @@ void ConvexHullSceneRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void ConvexHullSceneRenderer::Update(DX::StepTimer const& timer)
 {
-	if (!m_tracking)
-	{
-		// Convert degrees to radians, then convert seconds to rotation angle
-		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
-		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
+	// Convert degrees to radians, then convert seconds to rotation angle
+	float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
+	double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
+	float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 
-		Rotate(radians);
-	}
+	Rotate(radians);
 }
 
 // Rotate the 3D cube model a set amount of radians.
@@ -84,26 +80,6 @@ void ConvexHullSceneRenderer::Rotate(float radians)
 {
 	// Prepare to pass the updated model matrix to the shader
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
-}
-
-void ConvexHullSceneRenderer::StartTracking()
-{
-	m_tracking = true;
-}
-
-// When tracking, the 3D cube can be rotated around its Y axis by tracking pointer position relative to the output screen width.
-void ConvexHullSceneRenderer::TrackingUpdate(float positionX)
-{
-	if (m_tracking)
-	{
-		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
-		Rotate(radians);
-	}
-}
-
-void ConvexHullSceneRenderer::StopTracking()
-{
-	m_tracking = false;
 }
 
 // Renders one frame using the vertex and pixel shaders.
