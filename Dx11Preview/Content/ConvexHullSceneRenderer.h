@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "..\Common\DeviceResources.h"
 #include "ShaderStructures.h"
@@ -7,10 +7,10 @@
 namespace Dx11Preview
 {
 	// This sample renderer instantiates a basic rendering pipeline.
-	class Sample3DSceneRenderer
+	class ConvexHullSceneRenderer
 	{
 	public:
-		Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+		ConvexHullSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		void CreateDeviceDependentResources();
 		void CreateWindowSizeDependentResources();
 		void ReleaseDeviceDependentResources();
@@ -48,3 +48,4 @@ namespace Dx11Preview
 	};
 }
 
+#pragma once
