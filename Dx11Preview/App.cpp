@@ -66,6 +66,9 @@ void App::SetWindow(CoreWindow^ window)
 	window->Closed += 
 		ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &App::OnWindowClosed);
 
+	window->PointerPressed +=
+		ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::OnPointerPressed);
+
 	DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
 
 	currentDisplayInformation->DpiChanged +=
@@ -170,6 +173,13 @@ void App::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ ar
 void App::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 {
 	m_windowClosed = true;
+}
+
+void Dx11Preview::App::OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
+{
+	if (args->CurrentPoint->Properties->IsLeftButtonPressed) {
+		m_windowClosed = true;
+	}
 }
 
 // DisplayInformation event handlers.
