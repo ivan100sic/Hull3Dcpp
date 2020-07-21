@@ -213,4 +213,3 @@ template<class Point>
 std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<Point> & points) {
 	return computeConvexHull3D(points, [](convex_hull_update, std::shared_ptr<hullgraph::vertex<Point>>) {});
 }
-
