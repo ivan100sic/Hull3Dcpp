@@ -4,7 +4,7 @@ using namespace std;
 using namespace hullgraph;
 
 int main() {
-	const int numPoints = 1000;
+	const int numPoints = 100000;
 	const double pi = acos(double(-1));
 
 	vector<point<double>> pts(numPoints);
