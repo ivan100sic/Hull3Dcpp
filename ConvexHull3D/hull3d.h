@@ -18,8 +18,16 @@ F facePointOrientation(std::shared_ptr<hullgraph::face<point<F>>> theFace, const
 	return orientation(points[0], points[1], points[2], thePoint);
 }
 
-template<class F>
-std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vector<point<F>>& points) {
+enum convex_hull_update : int {
+	initialTetrahedron,
+	afterJoinFaces,
+	afterInscribeVertex,
+	afterMergeFaces,
+	afterRemoveRedundantVertices,
+};
+
+template<class F, class Callback>
+std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vector<point<F>>& points, Callback callback) {
 	using namespace hullgraph;
 	using vertexptr = std::shared_ptr<vertex<point<F>>>;
 	using edgeptr = std::shared_ptr<edge<point<F>>>;
@@ -75,6 +83,8 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 	faceptr baseTriangle = makeTriangle(firstFourPoints[0], firstFourPoints[1], firstFourPoints[2]);
 	vertexptr peakVertex = inscribeVertex(baseTriangle, firstFourPoints[3]);
 
+	callback(convex_hull_update::initialTetrahedron, peakVertex);
+
 	// shuffle the remaining points
 	{
 		static std::mt19937_64 rngEngine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
@@ -111,6 +121,7 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 		if (pointToFaces[i].size()) {
 			std::vector<faceptr> faceSetToVector(pointToFaces[i].begin(), pointToFaces[i].end());
 			join_faces_result<point<F>> joinResult = joinFaces(faceSetToVector);
+			callback(convex_hull_update::afterJoinFaces, peakVertex);
 
 			std::vector<vertexptr> borderVertices(joinResult.borderEdges.size());
 			for (size_t i = 0; i < joinResult.borderEdges.size(); i++) {
@@ -119,6 +130,7 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 
 			vertexptr newVertex = inscribeVertex(joinResult.newFace, remainingPoints[i]);
 			peakVertex = newVertex;
+			callback(convex_hull_update::afterInscribeVertex, peakVertex);
 
 			std::vector<edgeptr> newVertexEdges = adjacentEdges(newVertex);
 			std::vector<bool> shouldMerge(newVertexEdges.size(), false);
@@ -168,6 +180,8 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 				}
 			}
 
+			callback(convex_hull_update::afterMergeFaces, peakVertex);
+
 			// Delete removed faces from the conflict graph
 			for (const faceptr& facePtr : faceSetToVector) {
 				auto mapIt = faceToPoints.find(facePtr);
@@ -186,8 +200,16 @@ std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vect
 					removeRedundantVertex(borderVertex);
 				}
 			}
+
+			callback(convex_hull_update::afterRemoveRedundantVertices, peakVertex);
 		}
 	}
 
 	return peakVertex;
 }
+
+template<class F>
+std::shared_ptr<hullgraph::vertex<point<F>>> computeConvexHull3D(const std::vector<point<F>>& points) {
+	return computeConvexHull3D(points, [](convex_hull_update, std::shared_ptr<hullgraph::vertex<point<F>>>) {});
+}
+
