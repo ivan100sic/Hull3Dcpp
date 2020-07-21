@@ -64,12 +64,18 @@
     <ClCompile Include="Content\ConvexHullSceneRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="Content\ConvexHullSceneManager.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Dx11PreviewMain.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Content\ConvexHullSceneRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ConvexHullSceneManager.h">
       <Filter>Content</Filter>
     </ClInclude>
   </ItemGroup>

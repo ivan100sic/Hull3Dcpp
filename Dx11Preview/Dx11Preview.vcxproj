@@ -252,6 +252,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Common\DeviceResources.h" />
+    <ClInclude Include="Content\ConvexHullSceneManager.h" />
     <ClInclude Include="Content\ConvexHullSceneRenderer.h" />
     <ClInclude Include="Dx11PreviewMain.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
@@ -263,6 +264,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
+    <ClCompile Include="Content\ConvexHullSceneManager.cpp" />
     <ClCompile Include="Content\ConvexHullSceneRenderer.cpp" />
     <ClCompile Include="Dx11PreviewMain.cpp" />
     <ClCompile Include="Content\SampleFpsTextRenderer.cpp" />

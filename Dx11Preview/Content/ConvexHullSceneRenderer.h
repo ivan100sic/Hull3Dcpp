@@ -4,6 +4,8 @@
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
 
+#include "..\..\ConvexHull3D/hull3d.h"
+
 namespace Dx11Preview
 {
 	// This sample renderer instantiates a basic rendering pipeline.
