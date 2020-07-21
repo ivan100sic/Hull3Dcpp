@@ -118,20 +118,20 @@ namespace hullgraph {
 	};
 
 	/*
-	 * Returns the inner face of a triangle containing the three given data labels, in normal order.
-	 */
-	template<class T>
-	std::shared_ptr<face<T>> makeTriangle(const T& dataA, const T& dataB, const T& dataC) {
-		return makePolygon(std::vector<T>{ dataA, dataB, dataC });
-	}
-
-	/*
 	 * Returns the inner face of a polygon containing the given data labels, in normal order.
 	 * Returns null if given fewer than three labels.
 	 */
 	template<class T>
 	std::shared_ptr<face<T>> makePolygon(const std::vector<T>& data) {
 		return hullgraph_implementations<T>::makePolygon(data);
+	}
+
+	/*
+	 * Returns the inner face of a triangle containing the three given data labels, in normal order.
+	 */
+	template<class T>
+	std::shared_ptr<face<T>> makeTriangle(const T& dataA, const T& dataB, const T& dataC) {
+		return makePolygon(std::vector<T>{ dataA, dataB, dataC });
 	}
 
 	/*
