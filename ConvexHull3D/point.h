@@ -25,6 +25,7 @@ template<class F, class Label>
 struct labeled_point : point<F> {
 	Label label;
 	
+	labeled_point() {}
 	labeled_point(const F& x, const F& y, const F& z, const Label& label) : point<F>{ x, y, z }, label(label) {}
 };
 
