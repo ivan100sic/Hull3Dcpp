@@ -135,6 +135,7 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 
 			std::vector<edgeptr> newVertexEdges = adjacentEdges(newVertex);
 			std::vector<bool> shouldMerge(newVertexEdges.size(), false);
+			std::vector<bool> shouldSkip(newVertexEdges.size(), false);
 
 			// Check whether the i-th new face should be merged
 			for (size_t j = 0; j < newVertexEdges.size(); j++) {
@@ -145,8 +146,32 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 				}
 			}
 
+			// First, merge adjacent coplanar new triangles
+			for (size_t j = 0; j < newVertexEdges.size(); j++) {
+				size_t jNext = j == newVertexEdges.size() - 1 ? 0 : j + 1;
+				if (shouldMerge[j]) {
+					faceptr adjacentFace1 = newVertexEdges[j]->next()->twin()->incidentFace();
+					if (shouldMerge[jNext]) {
+						faceptr adjacentFace2 = newVertexEdges[jNext]->next()->twin()->incidentFace();
+						if (adjacentFace1 == adjacentFace2) {
+							shouldSkip[jNext] = true;
+						}
+					}
+				}
+			}
+
+			for (size_t j = 0; j < newVertexEdges.size(); j++) {
+				if (shouldSkip[j]) {
+					removeEdge(newVertexEdges[j]);
+				}
+			}
+
 			// Process the new faces
 			for (size_t j = 0; j < newVertexEdges.size(); j++) {
+				if (shouldSkip[j]) {
+					continue;
+				}
+
 				if (shouldMerge[j]) {
 					// Merge the two faces and adjust the conflict graph
 					faceptr adjacentFace = newVertexEdges[j]->next()->twin()->incidentFace();
