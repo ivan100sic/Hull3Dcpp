@@ -3,6 +3,7 @@
 #include "../ConvexHull3D/point.h"
 #include "../ConvexHull3D/hullgraph.h"
 #include "../ConvexHull3D/hull3d.h"
+#include "../ConvexHull3D/delaunay.h"
 
 #include <set>
 
@@ -299,6 +300,29 @@ namespace ConvexHull3DUnitTests {
 			std::shared_ptr<face<point<int>>> hullFace = hullVertex->incidentEdge()->incidentFace();
 			Assert::AreEqual(5, (int)faceToEdgeList(hullFace).size());
 		}
+	};
+
+	TEST_CLASS(DelaunayTriangulationTests) {
+	public:
+
+		TEST_METHOD(IsFaceDirectedUpTest1) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, 0, 10} };
+			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
+			Assert::IsFalse(isFaceDirectedUp(triangle));
+		}
+
+		TEST_METHOD(IsFaceDirectedUpTest2) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, 1, 10} };
+			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
+			Assert::IsTrue(isFaceDirectedUp(triangle));
+		}
+
+		TEST_METHOD(IsFaceDirectedUpTest3) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, -1, 10} };
+			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
+			Assert::IsFalse(isFaceDirectedUp(triangle));
+		}
+
 	};
 
 

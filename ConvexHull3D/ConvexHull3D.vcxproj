@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="delaunay.h" />
     <ClInclude Include="hull3d.h" />
     <ClInclude Include="hullgraph.h" />
     <ClInclude Include="point.h" />
