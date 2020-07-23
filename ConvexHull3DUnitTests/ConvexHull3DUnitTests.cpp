@@ -172,17 +172,20 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(Hull3DCubeLattice) {
 			std::vector<point<int>> pts;
-			for (int i = 0; i < 10; i++) {
-				for (int j = 0; j < 10; j++) {
-					for (int k = 0; k < 10; k++) {
+
+			for (int i = 0; i < 6; i++) {
+				for (int j = 0; j < 6; j++) {
+					for (int k = 0; k < 6; k++) {
 						pts.push_back({ i, j, k });
 					}
 				}
 			}
 
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
-			Assert::AreEqual(24, (int)allEdges.size());
+			for (size_t repetition = 0; repetition < 100; repetition++) {
+				std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+				std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+				Assert::AreEqual(24, (int)allEdges.size());
+			}
 		}
 
 		TEST_METHOD(Hull3DParaboloid) {
