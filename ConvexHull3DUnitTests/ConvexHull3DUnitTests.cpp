@@ -222,7 +222,7 @@ namespace ConvexHull3DUnitTests {
 			std::shared_ptr<vertex<point<double>>> hullVertex = computeConvexHull3D(pts);
 			std::vector<std::shared_ptr<edge<point<double>>>> allEdges = exploreGraph(hullVertex);
 
-			Assert::AreEqual(6*numPoints - 12, (int)allEdges.size());
+			Assert::AreEqual(6 * numPoints - 12, (int)allEdges.size());
 		}
 
 		TEST_METHOD(Hull3DTetrahedron1) {
@@ -323,6 +323,65 @@ namespace ConvexHull3DUnitTests {
 			Assert::IsFalse(isFaceDirectedUp(triangle));
 		}
 
+		TEST_METHOD(DelaunayTriangulationBasicTest1) {
+			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {6, 6} };
+			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			Assert::AreEqual(4, (int)faceToEdgeList(extFace).size());
+
+			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3} };
+			std::set<std::pair<size_t, size_t>> actualEdges;
+
+			for (const auto& theEdge : exploreGraph(extFace->outerComponent()->origin())) {
+				size_t u = theEdge->origin()->data().label;
+				size_t v = theEdge->destination()->data().label;
+			
+				if (u < v) {
+					actualEdges.insert({ u, v });
+				}
+			}
+
+			Assert::IsTrue(actualEdges == std::set<std::pair<size_t, size_t>>(std::begin(expectedEdges), std::end(expectedEdges)));
+		}
+
+		TEST_METHOD(DelaunayTriangulationBasicTest2) {
+			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {13, 13} };
+			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			Assert::AreEqual(4, (int)faceToEdgeList(extFace).size());
+
+			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3} };
+			std::set<std::pair<size_t, size_t>> actualEdges;
+
+			for (const auto& theEdge : exploreGraph(extFace->outerComponent()->origin())) {
+				size_t u = theEdge->origin()->data().label;
+				size_t v = theEdge->destination()->data().label;
+
+				if (u < v) {
+					actualEdges.insert({ u, v });
+				}
+			}
+
+			Assert::IsTrue(actualEdges == std::set<std::pair<size_t, size_t>>(std::begin(expectedEdges), std::end(expectedEdges)));
+		}
+
+		TEST_METHOD(DelaunayTriangulationBasicTest3) {
+			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10}, {17, 5} };
+			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			Assert::AreEqual(5, (int)faceToEdgeList(extFace).size());
+
+			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {1, 3}, {2, 3}, {2, 4}, {3, 4} };
+			std::set<std::pair<size_t, size_t>> actualEdges;
+
+			for (const auto& theEdge : exploreGraph(extFace->outerComponent()->origin())) {
+				size_t u = theEdge->origin()->data().label;
+				size_t v = theEdge->destination()->data().label;
+
+				if (u < v) {
+					actualEdges.insert({ u, v });
+				}
+			}
+
+			Assert::IsTrue(actualEdges == std::set<std::pair<size_t, size_t>>(std::begin(expectedEdges), std::end(expectedEdges)));
+		}
 	};
 
 
