@@ -30,6 +30,18 @@ struct labeled_point : point<F> {
 };
 
 /*
+ * Computes the determinant of the 3x3 matrix whose columns are given points.
+ */
+template<class Point>
+decltype(Point::x) determinant(const Point& a, const Point& b, const Point& c) {
+	decltype(Point::x) sum(0);
+	sum += a.x * (b.y * c.z - b.z * c.y);
+	sum += a.y * (b.z * c.x - b.x * c.z);
+	sum += a.z * (b.x * c.y - b.y * c.x);
+	return sum;
+}
+
+/*
  * Returns a positive value if the four points given in this order are in normal order, a negative
  * value if they are in antinormal order, and zero if they are coplanar.
  * The argument should be of the same type (template parameter Point), and should be point-like.
@@ -37,14 +49,7 @@ struct labeled_point : point<F> {
  */
 template<class Point>
 decltype(Point::x) orientation(const Point& p, const Point& q, const Point& r, const Point& s) {
-	decltype(Point::x) sum(0);
-	auto a = q - p;
-	auto b = r - p;
-	auto c = s - p;
-	sum += a.x * (b.y * c.z - b.z * c.y);
-	sum += a.y * (b.z * c.x - b.x * c.z);
-	sum += a.z * (b.x * c.y - b.y * c.x);
-	return sum;
+	return determinant(q - p, r - p, s - p);
 }
 
 /*
