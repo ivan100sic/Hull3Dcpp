@@ -30,15 +30,31 @@ struct labeled_point : point<F> {
 };
 
 /*
+ * Computes the vector product of two 3d vectors.
+ */
+template<class Point>
+Point vectorProduct(const Point& a, const Point& b) {
+	Point result;
+	result.x = a.y * b.z - a.z * b.y;
+	result.y = a.z * b.x - a.x * b.z;
+	result.z = a.x * b.y - a.y * b.x;
+	return result;
+}
+
+/*
+ * Computes the scalar product of two 3d vectors.
+ */
+template<class Point>
+decltype(Point::x) scalarProduct(const Point& a, const Point& b) {
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+/*
  * Computes the determinant of the 3x3 matrix whose columns are given points.
  */
 template<class Point>
 decltype(Point::x) determinant(const Point& a, const Point& b, const Point& c) {
-	decltype(Point::x) sum(0);
-	sum += a.x * (b.y * c.z - b.z * c.y);
-	sum += a.y * (b.z * c.x - b.x * c.z);
-	sum += a.z * (b.x * c.y - b.y * c.x);
-	return sum;
+	return scalarProduct(vectorProduct(a, b), c);
 }
 
 /*
