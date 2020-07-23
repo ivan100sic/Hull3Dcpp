@@ -24,7 +24,7 @@ Dx11Preview::ConvexHullScene Dx11Preview::GenerateScene(
 	const std::vector<input_point>& inputPoints
 ) {
 	using DirectX::XMFLOAT3;
-	const float cubeSize = 0.01f;
+	const float cubeSize = 0.007f;
 	XMFLOAT3 cubeColor{ 1.0f, 0.0f, 0.0f };
 	XMFLOAT3 edgeColor{ 0.5f, 0.5f, 0.5f };
 	
