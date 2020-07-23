@@ -48,7 +48,7 @@ Dx11Preview::ConvexHullScene Dx11Preview::GenerateScene(
 	
 	auto allEdges = exploreGraph(hullVertex);
 
-	// Generate triangles (for now) corresponding to convex hull edges
+	// Generate line segments corresponding to convex hull edges
 	for (auto& edge : allEdges)
 	{
 		size_t u = edge->origin()->data().label;
@@ -64,12 +64,10 @@ Dx11Preview::ConvexHullScene Dx11Preview::GenerateScene(
 
 		unsigned short baseIdx = static_cast<unsigned short>(scene.sceneVertices.size());
 		scene.sceneVertices.push_back({ XMFLOAT3{ ux, uy, uz }, edgeColor });
-		scene.sceneVertices.push_back({ XMFLOAT3{ ux, uy, uz + cubeSize }, edgeColor });
 		scene.sceneVertices.push_back({ XMFLOAT3{ vx, vy, vz }, edgeColor });
 
-		scene.sceneIndices.push_back(baseIdx);
-		scene.sceneIndices.push_back(baseIdx + 1);
-		scene.sceneIndices.push_back(baseIdx + 2);
+		scene.sceneLineIndices.push_back(baseIdx);
+		scene.sceneLineIndices.push_back(baseIdx + 1);
 	}
 
 	// Generate vertices corresponding to input point cubes
@@ -90,7 +88,7 @@ Dx11Preview::ConvexHullScene Dx11Preview::GenerateScene(
 
 		for (size_t j = 0; j < std::size(cubeIdxOffsets); j++)
 		{
-			scene.sceneIndices.push_back(cubeIdxOffsets[j] + baseIdx);
+			scene.sceneTriangleIndices.push_back(cubeIdxOffsets[j] + baseIdx);
 		}
 	}
 

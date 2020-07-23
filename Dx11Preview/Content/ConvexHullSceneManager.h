@@ -12,7 +12,8 @@ namespace Dx11Preview
 	struct ConvexHullScene
 	{
 		std::vector<VertexPositionColor> sceneVertices;
-		std::vector<unsigned short> sceneIndices;
+		std::vector<unsigned short> sceneTriangleIndices;
+		std::vector<unsigned short> sceneLineIndices;
 	};
 
 	std::vector<input_point> GenerateRandomPoints(size_t numPoints);

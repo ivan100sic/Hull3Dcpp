@@ -13,7 +13,7 @@ using namespace Windows::Foundation;
 ConvexHullSceneRenderer::ConvexHullSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
-	m_indexCount(0),
+	m_indexCountTriangles(0),
 	m_deviceResources(deviceResources)
 {
 	CreateDeviceDependentResources();
@@ -94,67 +94,34 @@ void ConvexHullSceneRenderer::Render()
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
-	// Prepare the constant buffer to send it to the graphics device.
-	context->UpdateSubresource1(
-		m_constantBuffer.Get(),
-		0,
-		NULL,
-		&m_constantBufferData,
-		0,
-		0,
-		0
-	);
-
-	// Each vertex is one instance of the VertexPositionColor struct.
-	UINT stride = sizeof(VertexPositionColor);
-	UINT offset = 0;
-	context->IASetVertexBuffers(
-		0,
-		1,
-		m_vertexBuffer.GetAddressOf(),
-		&stride,
-		&offset
-	);
-
-	context->IASetIndexBuffer(
-		m_indexBuffer.Get(),
-		DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
-		0
-	);
-
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	context->IASetInputLayout(m_inputLayout.Get());
-
 	// Attach our vertex shader.
-	context->VSSetShader(
-		m_vertexShader.Get(),
-		nullptr,
-		0
-	);
-
-	// Send the constant buffer to the graphics device.
-	context->VSSetConstantBuffers1(
-		0,
-		1,
-		m_constantBuffer.GetAddressOf(),
-		nullptr,
-		nullptr
-	);
+	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 
 	// Attach our pixel shader.
-	context->PSSetShader(
-		m_pixelShader.Get(),
-		nullptr,
-		0
-	);
+	context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	// Draw the objects.
-	context->DrawIndexed(
-		m_indexCount,
-		0,
-		0
-	);
+	// Prepare the constant buffer to send it to the graphics device.
+	context->UpdateSubresource1(m_constantBuffer.Get(), 0, NULL, &m_constantBufferData, 0, 0, 0);
+
+	// Send the constant buffer to the graphics device.
+	context->VSSetConstantBuffers1(0, 1, m_constantBuffer.GetAddressOf(), nullptr, nullptr);
+
+	// Each vertex is one instance of the VertexPositionColor struct.
+	// Each index is one 16-bit unsigned integer (short).
+	UINT stride = sizeof(VertexPositionColor);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+	context->IASetInputLayout(m_inputLayout.Get());
+
+	// First, draw the line segments
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	context->IASetIndexBuffer(m_indexBufferLines.Get(), DXGI_FORMAT_R16_UINT, 0);
+	context->DrawIndexed(m_indexCountLines, 0, 0);
+
+	// Now drawing triangles
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetIndexBuffer(m_indexBufferTriangles.Get(), DXGI_FORMAT_R16_UINT, 0);
+	context->DrawIndexed(m_indexCountTriangles, 0, 0);
 }
 
 void ConvexHullSceneRenderer::CreateDeviceDependentResources()
@@ -233,12 +200,13 @@ void ConvexHullSceneRenderer::CreateDeviceDependentResources()
 			)
 		);
 
-		m_indexCount = static_cast<unsigned int>(scene.sceneIndices.size());
+		// Set up m_indexBufferTriangles 
+		m_indexCountTriangles = static_cast<unsigned int>(scene.sceneTriangleIndices.size());
 
-		UINT indexBufferSz = static_cast<UINT>(scene.sceneIndices.size() * sizeof(unsigned short));
+		UINT indexBufferSz = static_cast<UINT>(scene.sceneTriangleIndices.size() * sizeof(unsigned short));
 
 		D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
-		indexBufferData.pSysMem = scene.sceneIndices.data();
+		indexBufferData.pSysMem = scene.sceneTriangleIndices.data();
 		indexBufferData.SysMemPitch = 0;
 		indexBufferData.SysMemSlicePitch = 0;
 		CD3D11_BUFFER_DESC indexBufferDesc(indexBufferSz, D3D11_BIND_INDEX_BUFFER);
@@ -246,7 +214,24 @@ void ConvexHullSceneRenderer::CreateDeviceDependentResources()
 			m_deviceResources->GetD3DDevice()->CreateBuffer(
 				&indexBufferDesc,
 				&indexBufferData,
-				&m_indexBuffer
+				&m_indexBufferTriangles
+			)
+		);
+
+		// Set up m_indexBufferLines
+		m_indexCountLines = static_cast<unsigned int>(scene.sceneLineIndices.size());
+
+		indexBufferSz = static_cast<UINT>(scene.sceneLineIndices.size() * sizeof(unsigned short));
+
+		indexBufferData.pSysMem = scene.sceneLineIndices.data();
+		indexBufferData.SysMemPitch = 0;
+		indexBufferData.SysMemSlicePitch = 0;
+		indexBufferDesc = CD3D11_BUFFER_DESC(indexBufferSz, D3D11_BIND_INDEX_BUFFER);
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateBuffer(
+				&indexBufferDesc,
+				&indexBufferData,
+				&m_indexBufferLines
 			)
 		);
 		});
@@ -265,5 +250,6 @@ void ConvexHullSceneRenderer::ReleaseDeviceDependentResources()
 	m_pixelShader.Reset();
 	m_constantBuffer.Reset();
 	m_vertexBuffer.Reset();
-	m_indexBuffer.Reset();
+	m_indexBufferTriangles.Reset();
+	m_indexBufferLines.Reset();
 }
