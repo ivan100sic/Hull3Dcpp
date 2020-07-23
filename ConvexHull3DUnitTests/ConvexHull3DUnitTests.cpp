@@ -182,7 +182,9 @@ namespace ConvexHull3DUnitTests {
 			}
 
 			for (size_t repetition = 0; repetition < 100; repetition++) {
-				std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+				std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts, [](auto e, auto v) {
+					validateGraph(v);
+				});
 				std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
 				Assert::AreEqual(24, (int)allEdges.size());
 			}
