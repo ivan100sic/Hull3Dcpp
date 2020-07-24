@@ -7,7 +7,7 @@
  * is positive.
  */
 template<class Point>
-bool isFaceDirectedUp(const std::shared_ptr<hullgraph::face<Point>>& theFace) {
+bool isFaceDirectedUpOrVertical(const std::shared_ptr<hullgraph::face<Point>>& theFace) {
 	using F = decltype(Point::x);
 	point<F> points[3];
 	std::shared_ptr<hullgraph::edge<Point>> walkingEdge = theFace->outerComponent();
@@ -20,7 +20,7 @@ bool isFaceDirectedUp(const std::shared_ptr<hullgraph::face<Point>>& theFace) {
 	zPlus.x = zPlus.y = 0;
 	zPlus.z = F(1);
 
-	return determinant(points[1] - points[0], points[2] - points[0], zPlus) > F(0);
+	return determinant(points[1] - points[0], points[2] - points[0], zPlus) >= F(0);
 }
 
 /*
@@ -50,7 +50,7 @@ std::shared_ptr<hullgraph::face<labeled_point<decltype(Point2D::x), size_t>>> de
 	// Join together all faces which look up
 	for (const auto& theEdge : allEdges) {
 		auto theFace = theEdge->incidentFace();
-		if (isFaceDirectedUp(theFace)) {
+		if (isFaceDirectedUpOrVertical(theFace)) {
 			facesToJoinSet.insert(theFace);
 		}
 	}

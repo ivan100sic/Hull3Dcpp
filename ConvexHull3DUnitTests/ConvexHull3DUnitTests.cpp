@@ -308,19 +308,19 @@ namespace ConvexHull3DUnitTests {
 		TEST_METHOD(IsFaceDirectedUpTest1) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, 0, 10} };
 			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
-			Assert::IsFalse(isFaceDirectedUp(triangle));
+			Assert::IsTrue(isFaceDirectedUpOrVertical(triangle));
 		}
 
 		TEST_METHOD(IsFaceDirectedUpTest2) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, 1, 10} };
 			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
-			Assert::IsTrue(isFaceDirectedUp(triangle));
+			Assert::IsTrue(isFaceDirectedUpOrVertical(triangle));
 		}
 
 		TEST_METHOD(IsFaceDirectedUpTest3) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, -1, 10} };
 			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
-			Assert::IsFalse(isFaceDirectedUp(triangle));
+			Assert::IsFalse(isFaceDirectedUpOrVertical(triangle));
 		}
 
 		TEST_METHOD(DelaunayTriangulationBasicTest1) {
@@ -383,6 +383,26 @@ namespace ConvexHull3DUnitTests {
 			Assert::IsTrue(actualEdges == std::set<std::pair<size_t, size_t>>(std::begin(expectedEdges), std::end(expectedEdges)));
 		}
 
+		TEST_METHOD(DelaunayTriangulationBasicTest4) {
+			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10} };
+			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			Assert::AreEqual(4, (int)faceToEdgeList(extFace).size());
+
+			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {1, 3}, {2, 3} };
+			std::set<std::pair<size_t, size_t>> actualEdges;
+
+			for (const auto& theEdge : exploreGraph(extFace->outerComponent()->origin())) {
+				size_t u = theEdge->origin()->data().label;
+				size_t v = theEdge->destination()->data().label;
+
+				if (u < v) {
+					actualEdges.insert({ u, v });
+				}
+			}
+
+			Assert::IsTrue(actualEdges == std::set<std::pair<size_t, size_t>>(std::begin(expectedEdges), std::end(expectedEdges)));
+		}
+
 		TEST_METHOD(DelaunayTriangulationGridTest) {
 			std::vector<point<int>> pts;
 			const int gridSize = 10;
@@ -397,7 +417,13 @@ namespace ConvexHull3DUnitTests {
 			Assert::AreEqual(4 * gridSize * (gridSize - 1), (int)allEdges.size());
 
 			for (const std::shared_ptr<edge<labeled_point<int, size_t>>> theEdge : allEdges) {
-				Assert::AreEqual(4, (int)faceToEdgeList(theEdge->incidentFace()).size());
+				std::shared_ptr<face<labeled_point<int, size_t>>> theFace = theEdge->incidentFace();
+				if (theFace == extFace) {
+					Assert::AreEqual(gridSize * 4 - 4, (int)faceToEdgeList(theFace).size());
+				}
+				else {
+					Assert::AreEqual(4, (int)faceToEdgeList(theFace).size());
+				}
 			}
 		}
 	};
