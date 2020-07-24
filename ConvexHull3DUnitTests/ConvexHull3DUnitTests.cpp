@@ -382,6 +382,24 @@ namespace ConvexHull3DUnitTests {
 
 			Assert::IsTrue(actualEdges == std::set<std::pair<size_t, size_t>>(std::begin(expectedEdges), std::end(expectedEdges)));
 		}
+
+		TEST_METHOD(DelaunayTriangulationGridTest) {
+			std::vector<point<int>> pts;
+			const int gridSize = 10;
+			for (int x = 0; x < gridSize; x++) {
+				for (int y = 0; y < gridSize; y++) {
+					pts.push_back({ x, y });
+				}
+			}
+
+			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			std::vector<std::shared_ptr<edge<labeled_point<int, size_t>>>> allEdges = exploreGraph(extFace->outerComponent()->origin());
+			Assert::AreEqual(4 * gridSize * (gridSize - 1), (int)allEdges.size());
+
+			for (const std::shared_ptr<edge<labeled_point<int, size_t>>> theEdge : allEdges) {
+				Assert::AreEqual(4, (int)faceToEdgeList(theEdge->incidentFace()).size());
+			}
+		}
 	};
 
 
