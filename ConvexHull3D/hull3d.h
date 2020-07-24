@@ -86,7 +86,7 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 	if (firstFourPoints.size() == 3) {
 		// All points are on the same plane
 		// Do the classical convex hull algorithm
-		Point normalVector = vectorProduct(firstFourPoints[1] - firstFourPoints[0], firstFourPoints[2] - firstFourPoints[0]);
+		point<F> normalVector = vectorProduct(firstFourPoints[1] - firstFourPoints[0], firstFourPoints[2] - firstFourPoints[0]);
 
 		auto leftTurn = [&](size_t a, size_t b, size_t c) {
 			return scalarProduct(normalVector, vectorProduct(points[b] - points[a], points[c] - points[a])) > F(0);

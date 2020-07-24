@@ -39,7 +39,7 @@ struct labeled_point : point<F> {
  * Computes the vector product of two 3d vectors.
  */
 template<class Point>
-Point vectorProduct(const Point& a, const Point& b) {
+point<decltype(Point::x)> vectorProduct(const Point& a, const Point& b) {
 	Point result;
 	result.x = a.y * b.z - a.z * b.y;
 	result.y = a.z * b.x - a.x * b.z;
