@@ -6,6 +6,8 @@
 #include <random>
 #include <chrono>
 #include <unordered_map>
+#include <algorithm>
+#include <numeric>
 
 template<class Point>
 decltype(Point::x) facePointOrientation(std::shared_ptr<hullgraph::face<Point>> theFace, const Point& thePoint) {
@@ -76,9 +78,46 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 		}
 	}
 
-	if (firstFourPoints.size() < 4) {
-		// Degenerate cases, won't handle them for now.
+	if (firstFourPoints.size() < 3) {
+		// All points are on the same line
 		return nullptr;
+	}
+
+	if (firstFourPoints.size() == 3) {
+		// All points are on the same plane
+		// Do the classical convex hull algorithm
+		Point normalVector = vectorProduct(firstFourPoints[1] - firstFourPoints[0], firstFourPoints[2] - firstFourPoints[0]);
+
+		auto leftTurn = [&](size_t a, size_t b, size_t c) {
+			return scalarProduct(normalVector, vectorProduct(points[b] - points[a], points[c] - points[a])) > F(0);
+		};
+
+		std::vector<size_t> pointStack[2], pointOrdering(points.size());
+		std::iota(pointOrdering.begin(), pointOrdering.end(), size_t(0));
+		std::sort(pointOrdering.begin(), pointOrdering.end(), [&](size_t i, size_t j) {
+			return points[i] < points[j];
+			});
+
+		for (int stackNum : {0, 1}) {
+			std::vector<size_t>& stack = pointStack[stackNum];
+			for (size_t i : pointOrdering) {
+				while (stack.size() >= 2 && leftTurn(stack[stack.size() - 1], stack[stack.size() - 2], i)) {
+					stack.pop_back();
+				}
+				stack.push_back(i);
+			}
+			stack.pop_back();
+			std::reverse(pointOrdering.begin(), pointOrdering.end());
+		}
+
+		pointStack[0].insert(pointStack[0].end(), pointStack[1].begin(), pointStack[1].end());
+
+		std::vector<Point> hullPoints(pointStack[0].size());
+		for (size_t i = 0; i < pointStack[0].size(); i++) {
+			hullPoints[i] = points[pointStack[0][i]];
+		}
+
+		return makePolygon(hullPoints)->outerComponent()->origin();
 	}
 
 	faceptr baseTriangle = makeTriangle(firstFourPoints[0], firstFourPoints[1], firstFourPoints[2]);

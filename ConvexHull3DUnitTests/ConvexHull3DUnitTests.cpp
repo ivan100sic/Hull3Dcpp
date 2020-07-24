@@ -278,6 +278,27 @@ namespace ConvexHull3DUnitTests {
 				}
 			}
 		}
+
+		TEST_METHOD(Hull3DPlanar1) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {0, 1, 10}, {2, 5, 4} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			Assert::AreEqual(6, (int)allEdges.size());
+		}
+
+		TEST_METHOD(Hull3DPlanar2) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {0, 0, 10}, {0, 10, 0}, {0, 10, 10}, {0, 5, 5} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::shared_ptr<face<point<int>>> hullFace = hullVertex->incidentEdge()->incidentFace();
+			Assert::AreEqual(4, (int)faceToEdgeList(hullFace).size());
+		}
+
+		TEST_METHOD(Hull3DPlanar3) {
+			std::vector<point<int>> pts = { {0, 0, 0}, {0, 0, 10}, {0, 10, 0}, {0, 10, 10}, {0, 5, 5}, {0, 13, 5} };
+			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			std::shared_ptr<face<point<int>>> hullFace = hullVertex->incidentEdge()->incidentFace();
+			Assert::AreEqual(5, (int)faceToEdgeList(hullFace).size());
+		}
 	};
 
 

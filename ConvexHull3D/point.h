@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 template<class F>
 struct point {
 	F x, y, z;
@@ -18,6 +20,10 @@ struct point {
 
 	bool operator== (const point& b) const {
 		return x == b.x && y == b.y && z == b.z;
+	}
+
+	bool operator< (const point& b) const {
+		return std::tie(x, y, z) < std::tie(b.x, b.y, b.z);
 	}
 };
 
