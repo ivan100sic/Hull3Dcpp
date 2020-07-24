@@ -50,8 +50,8 @@ Point vectorProduct(const Point& a, const Point& b) {
 /*
  * Computes the scalar product of two 3d vectors.
  */
-template<class Point>
-decltype(Point::x) scalarProduct(const Point& a, const Point& b) {
+template<class Point1, class Point2>
+decltype(Point1::x) scalarProduct(const Point1& a, const Point2& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
