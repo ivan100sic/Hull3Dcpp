@@ -26,9 +26,38 @@ namespace Dx11Preview {
 	{
 	}
 
-	void ConvexHullSceneManager::SimulationStep()
+	ConvexHullScene ConvexHullSceneManager::SimulationStep()
 	{
-		m_hullVertex = computeConvexHull3D(m_inputPoints);
+		std::unique_lock<std::mutex> lock(m_dataMutex);
+		m_canResumeFlag = true;
+		m_canResumeCv.notify_all();
+
+		if (!m_hullVertex)
+		{
+			auto computeCallback = [this](convex_hull_update updateType, std::shared_ptr<hullgraph::vertex<input_point>> newVertex) {
+				if (updateType != convex_hull_update::afterRemoveRedundantVertices &&
+				    updateType != convex_hull_update::initialTetrahedron)
+				{
+					return;
+				}
+
+				std::unique_lock<std::mutex> lock(m_dataMutex);
+
+				// Only continue when SimulationStep is called again
+				m_canResumeCv.wait(lock, [this]() { return m_canResumeFlag; });
+				m_canResumeFlag = false;
+
+				auto oldEdges = exploreGraph(m_hullVertex);
+				m_previousStepEdges = decltype(m_previousStepEdges)(oldEdges.begin(), oldEdges.end());
+				m_hullVertex = newVertex;
+			};
+
+			m_computeThread = std::thread([this, computeCallback]() {
+				computeConvexHull3D(m_inputPoints, computeCallback);
+				});
+		}
+
+		return GenerateScene();
 	}
 
 	ConvexHullScene ConvexHullSceneManager::GenerateScene()
@@ -41,7 +70,9 @@ namespace Dx11Preview {
 		using DirectX::XMFLOAT3;
 		const float cubeSize = 0.007f;
 		XMFLOAT3 cubeColor{ 1.0f, 0.0f, 0.0f };
-		XMFLOAT3 edgeColor{ 0.5f, 0.5f, 0.5f };
+		XMFLOAT3 edgeColor{ 1.0f, 1.0f, 1.0f };
+		XMFLOAT3 newEdgeColor{ 0.0f, 0.6f, 1.0f };
+		XMFLOAT3 deletedEdgeColor{ 0.3f, 0.0f, 0.0f };
 
 		const unsigned short cubeIdxOffsets[] =
 		{
@@ -60,12 +91,8 @@ namespace Dx11Preview {
 		};
 
 		ConvexHullScene scene;
-
-		auto allEdges = exploreGraph(m_hullVertex);
-
-		// Generate line segments corresponding to convex hull edges
-		for (auto& edge : allEdges)
-		{
+		
+		auto addEdgeToScene = [&](auto& edge, auto color) {
 			size_t u = edge->origin()->data().label;
 			size_t v = edge->destination()->data().label;
 
@@ -78,11 +105,19 @@ namespace Dx11Preview {
 			float vz = m_inputPoints[v].z;
 
 			unsigned short baseIdx = static_cast<unsigned short>(scene.sceneVertices.size());
-			scene.sceneVertices.push_back({ XMFLOAT3{ ux, uy, uz }, edgeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ vx, vy, vz }, edgeColor });
-
+			scene.sceneVertices.push_back({ XMFLOAT3{ ux, uy, uz }, color });
+			scene.sceneVertices.push_back({ XMFLOAT3{ vx, vy, vz }, color });
 			scene.sceneLineIndices.push_back(baseIdx);
 			scene.sceneLineIndices.push_back(baseIdx + 1);
+		};
+
+		auto allEdges = exploreGraph(m_hullVertex);
+
+		// Generate line segments corresponding to convex hull edges
+		for (auto& edge : allEdges)
+		{
+			auto thisEdgeColor = m_previousStepEdges.count(edge) ? edgeColor : newEdgeColor;
+			addEdgeToScene(edge, thisEdgeColor);
 		}
 
 		// Generate vertices corresponding to input point cubes

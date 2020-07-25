@@ -4,6 +4,8 @@
 
 #include "..\..\ConvexHull3D\hull3d.h"
 #include "ShaderStructures.h"
+#include <thread>
+#include <condition_variable>
 
 namespace Dx11Preview
 {
@@ -20,10 +22,16 @@ namespace Dx11Preview
 	{
 		std::vector<input_point> m_inputPoints;
 		std::shared_ptr<hullgraph::vertex<input_point>> m_hullVertex;
+		std::thread m_computeThread;
+		std::unordered_set<std::shared_ptr<hullgraph::edge<input_point>>> m_previousStepEdges;
+		
+		bool m_canResumeFlag;
+		std::mutex m_dataMutex;
+		std::condition_variable m_canResumeCv;
+		ConvexHullScene GenerateScene();
 	public:
 		ConvexHullSceneManager(const std::vector<input_point>& inputPoints);
-		void SimulationStep();
-		ConvexHullScene GenerateScene();
+		ConvexHullScene SimulationStep();
 	};
 
 	std::vector<input_point> GenerateRandomPoints(size_t numPoints);

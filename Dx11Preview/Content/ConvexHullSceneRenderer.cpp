@@ -13,7 +13,7 @@ using namespace Windows::Foundation;
 ConvexHullSceneRenderer::ConvexHullSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
 	m_recreatingScene(false),
-	m_degreesPerSecond(45),
+	m_degreesPerSecond(30),
 	m_indexCountTriangles(0),
 	m_deviceResources(deviceResources)
 {
@@ -83,22 +83,19 @@ void ConvexHullSceneRenderer::Rotate(float radians)
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
 
-void Dx11Preview::ConvexHullSceneRenderer::RecreateScene()
+void Dx11Preview::ConvexHullSceneRenderer::RecreateScene(const ConvexHullScene& scene)
 {
 	if (!m_loadingComplete)
 	{
 		return;
 	}
 
-	std::unique_lock<std::mutex> lock(m_recreateSceneMutex);
+	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
 
-	auto scene = m_sceneManager->GenerateScene();
-	if (!scene.sceneVertices.size())
+	if (!scene.sceneVertices.size() || !scene.sceneTriangleIndices.size() || !scene.sceneLineIndices.size())
 	{
 		return;
 	}
-
-	m_recreatingScene = true;
 
 	UINT vertexBufferSz = static_cast<UINT>(scene.sceneVertices.size() * sizeof(VertexPositionColor));
 
@@ -149,18 +146,18 @@ void Dx11Preview::ConvexHullSceneRenderer::RecreateScene()
 			&m_indexBufferLines
 		)
 	);
-
-	m_recreatingScene = false;
 }
 
 // Renders one frame using the vertex and pixel shaders.
 void ConvexHullSceneRenderer::Render()
 {
 	// Loading is asynchronous. Only draw geometry after it's loaded.
-	if (!m_loadingComplete || m_recreatingScene)
+	if (!m_loadingComplete)
 	{
 		return;
 	}
+
+	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -200,8 +197,7 @@ void Dx11Preview::ConvexHullSceneRenderer::SimulationStep()
 		m_sceneManager = std::make_unique<ConvexHullSceneManager>(GenerateRandomPoints(50));
 	}
 		
-	m_sceneManager->SimulationStep();
-	RecreateScene();
+	RecreateScene(m_sceneManager->SimulationStep());
 }
 
 void ConvexHullSceneRenderer::CreateDeviceDependentResources()

@@ -24,7 +24,7 @@ namespace Dx11Preview
 
 	private:
 		void Rotate(float radians);
-		void RecreateScene();
+		void RecreateScene(const ConvexHullScene& scene);
 
 	private:
 		// Cached pointer to device resources.
@@ -51,7 +51,7 @@ namespace Dx11Preview
 
 		// The convex hull solver/simulation
 		std::unique_ptr<ConvexHullSceneManager> m_sceneManager;
-		std::mutex m_recreateSceneMutex;
+		std::mutex m_dxBuffersMutex;
 	};
 }
 
