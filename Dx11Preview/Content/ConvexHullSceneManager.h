@@ -16,10 +16,15 @@ namespace Dx11Preview
 		std::vector<unsigned short> sceneLineIndices;
 	};
 
-	std::vector<input_point> GenerateRandomPoints(size_t numPoints);
-	ConvexHullScene GenerateScene(
-		const std::shared_ptr<hullgraph::vertex<input_point>>& hullVertex,
-		const std::vector<input_point>& inputPoints
-	);
+	class ConvexHullSceneManager
+	{
+		std::vector<input_point> m_inputPoints;
+		std::shared_ptr<hullgraph::vertex<input_point>> m_hullVertex;
+	public:
+		ConvexHullSceneManager(const std::vector<input_point>& inputPoints);
+		void SimulationStep();
+		ConvexHullScene GenerateScene();
+	};
 
+	std::vector<input_point> GenerateRandomPoints(size_t numPoints);
 }

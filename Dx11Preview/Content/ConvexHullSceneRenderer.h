@@ -2,9 +2,11 @@
 
 #include "..\Common\DeviceResources.h"
 #include "ShaderStructures.h"
+#include "ConvexHullSceneManager.h"
 #include "..\Common\StepTimer.h"
 
 #include "..\..\ConvexHull3D/hull3d.h"
+#include <mutex>
 
 namespace Dx11Preview
 {
@@ -18,9 +20,11 @@ namespace Dx11Preview
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);
 		void Render();
+		void SimulationStep();
 
 	private:
 		void Rotate(float radians);
+		void RecreateScene();
 
 	private:
 		// Cached pointer to device resources.
@@ -42,7 +46,12 @@ namespace Dx11Preview
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;
+		bool	m_recreatingScene;
 		float	m_degreesPerSecond;
+
+		// The convex hull solver/simulation
+		std::unique_ptr<ConvexHullSceneManager> m_sceneManager;
+		std::mutex m_recreateSceneMutex;
 	};
 }
 

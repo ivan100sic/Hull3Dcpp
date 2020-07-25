@@ -84,6 +84,14 @@ bool Dx11PreviewMain::Render()
 	return true;
 }
 
+void Dx11Preview::Dx11PreviewMain::SimulationStep()
+{
+	if (m_sceneRenderer)
+	{
+		m_sceneRenderer->SimulationStep();
+	}
+}
+
 // Notifies renderers that device resources need to be released.
 void Dx11PreviewMain::OnDeviceLost()
 {

@@ -16,6 +16,7 @@ namespace Dx11Preview
 		void CreateWindowSizeDependentResources();
 		void Update();
 		bool Render();
+		void SimulationStep();
 
 		// IDeviceNotify
 		virtual void OnDeviceLost();

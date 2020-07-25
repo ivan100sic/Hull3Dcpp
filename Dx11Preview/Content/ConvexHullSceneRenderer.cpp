@@ -12,6 +12,7 @@ using namespace Windows::Foundation;
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 ConvexHullSceneRenderer::ConvexHullSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
+	m_recreatingScene(false),
 	m_degreesPerSecond(45),
 	m_indexCountTriangles(0),
 	m_deviceResources(deviceResources)
@@ -57,9 +58,8 @@ void ConvexHullSceneRenderer::CreateWindowSizeDependentResources()
 		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
 	);
 
-	// Eye is at (0,0.7,1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
-	static const XMVECTORF32 eye = { 0.0f, 0.7f, 1.5f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const XMVECTORF32 eye = { 0.0f, 0.5f, 1.2f, 0.0f };
+	static const XMVECTORF32 at = { 0.0f, -0.08f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
@@ -83,11 +83,81 @@ void ConvexHullSceneRenderer::Rotate(float radians)
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
 
+void Dx11Preview::ConvexHullSceneRenderer::RecreateScene()
+{
+	if (!m_loadingComplete)
+	{
+		return;
+	}
+
+	std::unique_lock<std::mutex> lock(m_recreateSceneMutex);
+
+	auto scene = m_sceneManager->GenerateScene();
+	if (!scene.sceneVertices.size())
+	{
+		return;
+	}
+
+	m_recreatingScene = true;
+
+	UINT vertexBufferSz = static_cast<UINT>(scene.sceneVertices.size() * sizeof(VertexPositionColor));
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+	vertexBufferData.pSysMem = scene.sceneVertices.data();
+	vertexBufferData.SysMemPitch = 0;
+	vertexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC vertexBufferDesc(vertexBufferSz, D3D11_BIND_VERTEX_BUFFER);
+	DX::ThrowIfFailed(
+		m_deviceResources->GetD3DDevice()->CreateBuffer(
+			&vertexBufferDesc,
+			&vertexBufferData,
+			&m_vertexBuffer
+		)
+	);
+
+	// Set up m_indexBufferTriangles 
+	m_indexCountTriangles = static_cast<unsigned int>(scene.sceneTriangleIndices.size());
+
+	UINT indexBufferSz = static_cast<UINT>(scene.sceneTriangleIndices.size() * sizeof(unsigned short));
+
+	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+	indexBufferData.pSysMem = scene.sceneTriangleIndices.data();
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
+	CD3D11_BUFFER_DESC indexBufferDesc(indexBufferSz, D3D11_BIND_INDEX_BUFFER);
+	DX::ThrowIfFailed(
+		m_deviceResources->GetD3DDevice()->CreateBuffer(
+			&indexBufferDesc,
+			&indexBufferData,
+			&m_indexBufferTriangles
+		)
+	);
+
+	// Set up m_indexBufferLines
+	m_indexCountLines = static_cast<unsigned int>(scene.sceneLineIndices.size());
+
+	indexBufferSz = static_cast<UINT>(scene.sceneLineIndices.size() * sizeof(unsigned short));
+
+	indexBufferData.pSysMem = scene.sceneLineIndices.data();
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
+	indexBufferDesc = CD3D11_BUFFER_DESC(indexBufferSz, D3D11_BIND_INDEX_BUFFER);
+	DX::ThrowIfFailed(
+		m_deviceResources->GetD3DDevice()->CreateBuffer(
+			&indexBufferDesc,
+			&indexBufferData,
+			&m_indexBufferLines
+		)
+	);
+
+	m_recreatingScene = false;
+}
+
 // Renders one frame using the vertex and pixel shaders.
 void ConvexHullSceneRenderer::Render()
 {
 	// Loading is asynchronous. Only draw geometry after it's loaded.
-	if (!m_loadingComplete)
+	if (!m_loadingComplete || m_recreatingScene)
 	{
 		return;
 	}
@@ -122,6 +192,16 @@ void ConvexHullSceneRenderer::Render()
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetIndexBuffer(m_indexBufferTriangles.Get(), DXGI_FORMAT_R16_UINT, 0);
 	context->DrawIndexed(m_indexCountTriangles, 0, 0);
+}
+
+void Dx11Preview::ConvexHullSceneRenderer::SimulationStep()
+{
+	if (!m_sceneManager) {
+		m_sceneManager = std::make_unique<ConvexHullSceneManager>(GenerateRandomPoints(50));
+	}
+		
+	m_sceneManager->SimulationStep();
+	RecreateScene();
 }
 
 void ConvexHullSceneRenderer::CreateDeviceDependentResources()
@@ -179,67 +259,10 @@ void ConvexHullSceneRenderer::CreateDeviceDependentResources()
 		);
 		});
 
-	// Once both shaders are loaded, create the mesh.
-	auto createSceneTask = (createPSTask && createVSTask).then([this]() {
-
-		auto inputPoints = GenerateRandomPoints(50);
-		auto scene = GenerateScene(computeConvexHull3D(inputPoints), inputPoints);
-
-		UINT vertexBufferSz = static_cast<UINT>(scene.sceneVertices.size() * sizeof(VertexPositionColor));
-
-		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
-		vertexBufferData.pSysMem = scene.sceneVertices.data();
-		vertexBufferData.SysMemPitch = 0;
-		vertexBufferData.SysMemSlicePitch = 0;
-		CD3D11_BUFFER_DESC vertexBufferDesc(vertexBufferSz, D3D11_BIND_VERTEX_BUFFER);
-		DX::ThrowIfFailed(
-			m_deviceResources->GetD3DDevice()->CreateBuffer(
-				&vertexBufferDesc,
-				&vertexBufferData,
-				&m_vertexBuffer
-			)
-		);
-
-		// Set up m_indexBufferTriangles 
-		m_indexCountTriangles = static_cast<unsigned int>(scene.sceneTriangleIndices.size());
-
-		UINT indexBufferSz = static_cast<UINT>(scene.sceneTriangleIndices.size() * sizeof(unsigned short));
-
-		D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
-		indexBufferData.pSysMem = scene.sceneTriangleIndices.data();
-		indexBufferData.SysMemPitch = 0;
-		indexBufferData.SysMemSlicePitch = 0;
-		CD3D11_BUFFER_DESC indexBufferDesc(indexBufferSz, D3D11_BIND_INDEX_BUFFER);
-		DX::ThrowIfFailed(
-			m_deviceResources->GetD3DDevice()->CreateBuffer(
-				&indexBufferDesc,
-				&indexBufferData,
-				&m_indexBufferTriangles
-			)
-		);
-
-		// Set up m_indexBufferLines
-		m_indexCountLines = static_cast<unsigned int>(scene.sceneLineIndices.size());
-
-		indexBufferSz = static_cast<UINT>(scene.sceneLineIndices.size() * sizeof(unsigned short));
-
-		indexBufferData.pSysMem = scene.sceneLineIndices.data();
-		indexBufferData.SysMemPitch = 0;
-		indexBufferData.SysMemSlicePitch = 0;
-		indexBufferDesc = CD3D11_BUFFER_DESC(indexBufferSz, D3D11_BIND_INDEX_BUFFER);
-		DX::ThrowIfFailed(
-			m_deviceResources->GetD3DDevice()->CreateBuffer(
-				&indexBufferDesc,
-				&indexBufferData,
-				&m_indexBufferLines
-			)
-		);
-		});
-
-	// Once the cube is loaded, the object is ready to be rendered.
-	createSceneTask.then([this]() {
+	// Once both shaders are loaded, set m_loadingComplete so other methods know
+	(createPSTask && createVSTask).then([this]() {
 		m_loadingComplete = true;
-		});
+		});	
 }
 
 void ConvexHullSceneRenderer::ReleaseDeviceDependentResources()

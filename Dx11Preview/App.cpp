@@ -178,7 +178,7 @@ void App::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 void Dx11Preview::App::OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args)
 {
 	if (args->CurrentPoint->Properties->IsLeftButtonPressed) {
-		m_windowClosed = true;
+		m_main->SimulationStep();
 	}
 }
 
