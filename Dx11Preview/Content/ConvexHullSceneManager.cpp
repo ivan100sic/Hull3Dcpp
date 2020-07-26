@@ -4,9 +4,9 @@
 
 namespace Dx11Preview {
 
-	std::vector<labeled_point<float, size_t>> Dx11Preview::GenerateRandomPoints(size_t numPoints)
+	std::vector<input_point> Dx11Preview::GenerateRandomPoints(size_t numPoints)
 	{
-		std::vector<labeled_point<float, size_t>> result(numPoints);
+		std::vector<input_point> result(numPoints);
 		static std::mt19937_64 randomEngine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 		std::uniform_real_distribution<float> unitSegment(-0.5f, 0.5f);
 
@@ -21,6 +21,30 @@ namespace Dx11Preview {
 		return result;
 	}
 
+	std::vector<input_point> GenerateCubicLattice(size_t latticeSize)
+	{
+		std::vector<input_point> result;
+		for (size_t i = 0; i < latticeSize; i++) {
+			for (size_t j = 0; j < latticeSize; j++) {
+				for (size_t k = 0; k < latticeSize; k++) {
+					float x = i / (latticeSize - 1.0f) - 0.5f;
+					float y = j / (latticeSize - 1.0f) - 0.5f;
+					float z = k / (latticeSize - 1.0f) - 0.5f;
+
+					input_point point;
+					point.label = result.size();
+					point.x = x;
+					point.y = y;
+					point.z = z;
+
+					result.push_back(point);
+				}
+			}
+		}
+
+		return result;
+	}
+
 	ConvexHullSceneManager::ConvexHullSceneManager(const std::vector<input_point>& inputPoints) :
 		m_inputPoints(inputPoints)
 	{
@@ -29,10 +53,8 @@ namespace Dx11Preview {
 	ConvexHullScene ConvexHullSceneManager::SimulationStep()
 	{
 		std::unique_lock<std::mutex> lock(m_dataMutex);
-		m_canResumeFlag = true;
-		m_canResumeCv.notify_all();
 
-		if (!m_hullVertex)
+		if (!m_computeThread.joinable())
 		{
 			auto computeCallback = [this](convex_hull_update updateType, std::shared_ptr<hullgraph::vertex<input_point>> newVertex) {
 				if (updateType != convex_hull_update::afterRemoveRedundantVertices &&
@@ -42,22 +64,27 @@ namespace Dx11Preview {
 				}
 
 				std::unique_lock<std::mutex> lock(m_dataMutex);
+				
+				m_hullVertex = newVertex;
 
 				// Only continue when SimulationStep is called again
 				m_canResumeCv.wait(lock, [this]() { return m_canResumeFlag; });
 				m_canResumeFlag = false;
-
-				auto oldEdges = exploreGraph(m_hullVertex);
-				m_previousStepEdges = decltype(m_previousStepEdges)(oldEdges.begin(), oldEdges.end());
-				m_hullVertex = newVertex;
 			};
 
 			m_computeThread = std::thread([this, computeCallback]() {
 				computeConvexHull3D(m_inputPoints, computeCallback);
 				});
-		}
 
-		return GenerateScene();
+			return {};
+		}
+		else
+		{
+			auto scene = GenerateScene();
+			m_canResumeFlag = true;
+			m_canResumeCv.notify_all();
+			return scene;
+		}
 	}
 
 	ConvexHullScene ConvexHullSceneManager::GenerateScene()
@@ -72,7 +99,6 @@ namespace Dx11Preview {
 		XMFLOAT3 cubeColor{ 1.0f, 0.0f, 0.0f };
 		XMFLOAT3 edgeColor{ 1.0f, 1.0f, 1.0f };
 		XMFLOAT3 newEdgeColor{ 0.0f, 0.6f, 1.0f };
-		XMFLOAT3 deletedEdgeColor{ 0.3f, 0.0f, 0.0f };
 
 		const unsigned short cubeIdxOffsets[] =
 		{
@@ -141,6 +167,8 @@ namespace Dx11Preview {
 				scene.sceneTriangleIndices.push_back(cubeIdxOffsets[j] + baseIdx);
 			}
 		}
+
+		m_previousStepEdges = decltype(m_previousStepEdges)(allEdges.begin(), allEdges.end());
 
 		return scene;
 	}

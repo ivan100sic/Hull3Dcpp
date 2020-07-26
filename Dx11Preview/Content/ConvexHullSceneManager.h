@@ -35,4 +35,5 @@ namespace Dx11Preview
 	};
 
 	std::vector<input_point> GenerateRandomPoints(size_t numPoints);
+	std::vector<input_point> GenerateCubicLattice(size_t latticeSize);
 }

@@ -58,8 +58,8 @@ void ConvexHullSceneRenderer::CreateWindowSizeDependentResources()
 		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
 	);
 
-	static const XMVECTORF32 eye = { 0.0f, 0.5f, 1.2f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, -0.08f, 0.0f, 0.0f };
+	static const XMVECTORF32 eye = { 0.0f, 0.55f, 1.2f, 0.0f };
+	static const XMVECTORF32 at = { 0.0f, -0.15f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
@@ -194,7 +194,7 @@ void ConvexHullSceneRenderer::Render()
 void Dx11Preview::ConvexHullSceneRenderer::SimulationStep()
 {
 	if (!m_sceneManager) {
-		m_sceneManager = std::make_unique<ConvexHullSceneManager>(GenerateRandomPoints(50));
+		m_sceneManager = std::make_unique<ConvexHullSceneManager>(GenerateCubicLattice(5));
 	}
 		
 	RecreateScene(m_sceneManager->SimulationStep());
