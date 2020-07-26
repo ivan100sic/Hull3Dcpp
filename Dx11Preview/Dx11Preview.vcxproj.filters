@@ -67,6 +67,9 @@
     <ClCompile Include="Content\ConvexHullSceneManager.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="Content\SceneRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -76,6 +79,9 @@
       <Filter>Content</Filter>
     </ClInclude>
     <ClInclude Include="Content\ConvexHullSceneManager.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SceneRenderer.h">
       <Filter>Content</Filter>
     </ClInclude>
   </ItemGroup>

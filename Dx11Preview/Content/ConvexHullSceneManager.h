@@ -3,6 +3,7 @@
 #include "pch.h"
 
 #include "..\..\ConvexHull3D\hull3d.h"
+#include "SceneRenderer.h"
 #include "ShaderStructures.h"
 #include <thread>
 #include <condition_variable>
@@ -10,13 +11,6 @@
 namespace Dx11Preview
 {
 	using input_point = labeled_point<float, size_t>;
-
-	struct ConvexHullScene
-	{
-		std::vector<VertexPositionColor> sceneVertices;
-		std::vector<unsigned short> sceneTriangleIndices;
-		std::vector<unsigned short> sceneLineIndices;
-	};
 
 	class ConvexHullSceneManager
 	{
@@ -28,10 +22,10 @@ namespace Dx11Preview
 		bool m_canResumeFlag;
 		std::mutex m_dataMutex;
 		std::condition_variable m_canResumeCv;
-		ConvexHullScene GenerateScene();
+		RenderingScene GenerateScene();
 	public:
 		ConvexHullSceneManager(const std::vector<input_point>& inputPoints);
-		ConvexHullScene SimulationStep();
+		RenderingScene SimulationStep();
 	};
 
 	std::vector<input_point> GenerateRandomPoints(size_t numPoints);

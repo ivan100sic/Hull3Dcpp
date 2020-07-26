@@ -50,7 +50,7 @@ namespace Dx11Preview {
 	{
 	}
 
-	ConvexHullScene ConvexHullSceneManager::SimulationStep()
+	RenderingScene ConvexHullSceneManager::SimulationStep()
 	{
 		std::unique_lock<std::mutex> lock(m_dataMutex);
 
@@ -87,7 +87,7 @@ namespace Dx11Preview {
 		}
 	}
 
-	ConvexHullScene ConvexHullSceneManager::GenerateScene()
+	RenderingScene ConvexHullSceneManager::GenerateScene()
 	{
 		if (!m_hullVertex)
 		{
@@ -116,7 +116,7 @@ namespace Dx11Preview {
 			1, 7, 5,
 		};
 
-		ConvexHullScene scene;
+		RenderingScene scene;
 		
 		auto addEdgeToScene = [&](auto& edge, auto color) {
 			size_t u = edge->origin()->data().label;
