@@ -31,16 +31,16 @@ typename voronoi_diagram<decltype(Point::x)>::point circumcenter(
 	using vd_point = voronoi_diagram<F>::point;
 
 	if (halfEdge->incidentFace() == outerFace) {
-		vd_point twinResult = circumcenter(halfEdge->twin(), outerFace);
+		vd_point result;
 
 		Point a = halfEdge->origin()->data();
 		Point b = halfEdge->destination()->data();
 
-		twinResult.x = a.x + b.x - twinResult.x - twinResult.x;
-		twinResult.y = a.y + b.y - twinResult.y - twinResult.y;
-		twinResult.atInfinity = true;
+		result.x = b.y - a.y;
+		result.y = a.x - b.x;
+		result.atInfinity = true;
 		
-		return twinResult;
+		return result;
 	}
 
 	vd_point result;
@@ -49,7 +49,7 @@ typename voronoi_diagram<decltype(Point::x)>::point circumcenter(
 	Point a = halfEdge->origin()->data();
 	Point b = halfEdge->destination()->data();
 	Point c = halfEdge->next()->destination()->data();
-	F dInverse = F(1) / (2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)));
+	F dInverse = F(1) / (F(2) * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)));
 
 	F aNorm2 = a.x * a.x + a.y * a.y;
 	F bNorm2 = b.x * b.x + b.y * b.y;
@@ -61,9 +61,9 @@ typename voronoi_diagram<decltype(Point::x)>::point circumcenter(
 		cNorm2 * (a.y - b.y)) * dInverse;
 
 	result.y = (
-		aNorm2 * (b.x - c.x) +
-		bNorm2 * (c.x - a.x) +
-		cNorm2 * (a.x - b.x)) * dInverse;
+		aNorm2 * (c.x - b.x) +
+		bNorm2 * (a.x - c.x) +
+		cNorm2 * (b.x - a.x)) * dInverse;
 
 	return result;
 }

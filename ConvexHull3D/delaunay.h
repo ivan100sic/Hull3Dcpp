@@ -36,8 +36,8 @@ std::shared_ptr<hullgraph::face<labeled_point<decltype(Point2D::x), size_t>>> de
 
 	std::vector<local_point> paraboloidPoints(points.size());
 	for (size_t i = 0; i < points.size(); i++) {
-		paraboloidPoints[i].x = 2 * points[i].x;
-		paraboloidPoints[i].y = 2 * points[i].y;
+		paraboloidPoints[i].x = points[i].x;
+		paraboloidPoints[i].y = points[i].y;
 		paraboloidPoints[i].z = points[i].x * points[i].x + points[i].y * points[i].y;
 		paraboloidPoints[i].label = i;
 	}

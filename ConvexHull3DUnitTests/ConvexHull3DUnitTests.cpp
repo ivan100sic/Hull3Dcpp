@@ -433,7 +433,7 @@ namespace ConvexHull3DUnitTests {
 	public:
 
 		TEST_METHOD(VoronoiDiagramCompilesAndSeemsToWork) {
-			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10}, {17, 5} };
+			std::vector<point<float>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10}, {17, 5} };
 			auto voronoiDiagram = computeVoronoiDiagram(pts);
 			Assert::IsTrue(voronoiDiagram.edgeList.size() == 6);
 			Assert::IsTrue(voronoiDiagram.pointList.size() == 7);
