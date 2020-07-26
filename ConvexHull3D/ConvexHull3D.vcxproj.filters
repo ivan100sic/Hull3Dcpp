@@ -30,5 +30,8 @@
     <ClInclude Include="voronoi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="convexhull3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

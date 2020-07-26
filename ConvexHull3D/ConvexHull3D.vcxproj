@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="convexhull3d.h" />
     <ClInclude Include="delaunay.h" />
     <ClInclude Include="hull3d.h" />
     <ClInclude Include="hullgraph.h" />
