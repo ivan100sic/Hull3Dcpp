@@ -1,8 +1,9 @@
 ﻿#pragma once
 
+#include "../Common/DeviceResources.h"
+#include "../Common/StepTimer.h"
+
 #include <string>
-#include "..\Common\DeviceResources.h"
-#include "..\Common\StepTimer.h"
 
 namespace Dx11Preview
 {

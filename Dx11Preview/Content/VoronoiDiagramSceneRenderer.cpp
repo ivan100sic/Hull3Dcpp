@@ -1,10 +1,7 @@
 #include "pch.h"
 
 #include "../../ConvexHull3D/voronoi.h"
-
 #include "VoronoiDiagramSceneRenderer.h"
-
-// Needed for GenerateRandomPoints
 #include "ConvexHullSceneManager.h"
 
 using namespace Dx11Preview;
@@ -22,7 +19,7 @@ void VoronoiDiagramSceneRenderer::UpdateViewport()
 	Size outputSize = m_deviceResources->GetOutputSize();
 	float aspectRatio = outputSize.Width / outputSize.Height;
 
-	XMMATRIX projectionMatrix = XMMatrixOrthographicRH(2.0 * aspectRatio, 2.0, -1.0f, 1.0f);
+	XMMATRIX projectionMatrix = XMMatrixOrthographicRH(2.0f * aspectRatio, 2.0, -1.0f, 1.0f);
 	
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixIdentity());
 	XMStoreFloat4x4(&m_constantBufferData.projection, projectionMatrix);
@@ -61,7 +58,7 @@ void VoronoiDiagramSceneRenderer::InitializeScene()
 	}
 
 	// Resolve points at infinity
-	for (auto& theEdge : voronoiDiagram.edgeList)
+	for (const auto& theEdge : voronoiDiagram.edgeList)
 	{
 		size_t u = theEdge.u;
 		size_t v = theEdge.v;
@@ -86,7 +83,7 @@ void VoronoiDiagramSceneRenderer::InitializeScene()
 	}
 
 	// Add triangulation edges to the scene
-	for (auto& theEdge : exploreGraph(outerFace->outerComponent()->origin()))
+	for (const auto& theEdge : exploreGraph(outerFace->outerComponent()->origin()))
 	{
 		size_t u = theEdge->origin()->data().label;
 		size_t v = theEdge->destination()->data().label;
@@ -98,12 +95,12 @@ void VoronoiDiagramSceneRenderer::InitializeScene()
 	{
 		size_t edgeBaseIdx = scene.sceneVertices.size();
 
-		for (auto& pt : voronoiDiagram.pointList)
+		for (const auto& pt : voronoiDiagram.pointList)
 		{
 			scene.sceneVertices.push_back({ XMFLOAT3{pt.x, pt.y, 0.0f}, voronoiEdgeColor });
 		}
 
-		for (auto& theEdge : voronoiDiagram.edgeList)
+		for (const auto& theEdge : voronoiDiagram.edgeList)
 		{
 			scene.sceneLineIndices.push_back(static_cast<unsigned short>(theEdge.u + edgeBaseIdx));
 			scene.sceneLineIndices.push_back(static_cast<unsigned short>(theEdge.v + edgeBaseIdx));

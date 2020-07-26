@@ -4,7 +4,6 @@
 
 namespace Dx11Preview
 {
-	// This sample renderer instantiates a basic rendering pipeline.
 	class VoronoiDiagramSceneRenderer : public SceneRenderer
 	{
 	public:
@@ -15,5 +14,3 @@ namespace Dx11Preview
 	private:
 	};
 }
-
-#pragma once

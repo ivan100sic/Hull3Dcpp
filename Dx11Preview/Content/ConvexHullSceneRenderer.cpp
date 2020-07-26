@@ -1,15 +1,15 @@
 #include "pch.h"
+
+#include "../Common/DirectXHelper.h"
 #include "ConvexHullSceneRenderer.h"
 #include "ConvexHullSceneManager.h"
-
-#include "..\Common\DirectXHelper.h"
 
 using namespace Dx11Preview;
 
 using namespace DirectX;
 using namespace Windows::Foundation;
 
-// Loads vertex and pixel shaders from files and instantiates the cube geometry.
+// Loads vertex and pixel shaders from files and instantiates the model geometry.
 ConvexHullSceneRenderer::ConvexHullSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	SceneRenderer(deviceResources),
 	m_degreesPerSecond(30)
@@ -37,12 +37,7 @@ void ConvexHullSceneRenderer::UpdateViewport()
 	// this transform should not be applied.
 
 	// This sample makes use of a right-handed coordinate system using row-major matrices.
-	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovRH(
-		fovAngleY,
-		aspectRatio,
-		0.01f,
-		100.0f
-	);
+	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovRH(fovAngleY, aspectRatio, 0.01f, 100.0f);
 
 	XMFLOAT4X4 orientation = m_deviceResources->GetOrientationTransform3D();
 
@@ -60,7 +55,7 @@ void ConvexHullSceneRenderer::UpdateViewport()
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 }
 
-// Called once per frame, rotates the cube and calculates the model and view matrices.
+// Called once per frame, rotates the model and calculates the model and view matrices.
 void ConvexHullSceneRenderer::Update(DX::StepTimer const& timer)
 {
 	// Convert degrees to radians, then convert seconds to rotation angle
@@ -71,7 +66,7 @@ void ConvexHullSceneRenderer::Update(DX::StepTimer const& timer)
 	Rotate(radians);
 }
 
-// Rotate the 3D cube model a set amount of radians.
+// Rotate the model a set amount of radians.
 void ConvexHullSceneRenderer::Rotate(float radians)
 {
 	// Prepare to pass the updated model matrix to the shader
@@ -83,6 +78,6 @@ void ConvexHullSceneRenderer::SimulationStep()
 	if (!m_sceneManager) {
 		m_sceneManager = std::make_unique<ConvexHullSceneManager>(GenerateCubicLattice(5));
 	}
-		
+
 	RecreateScene(m_sceneManager->SimulationStep());
 }

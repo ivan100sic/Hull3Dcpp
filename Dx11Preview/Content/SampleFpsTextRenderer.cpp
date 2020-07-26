@@ -1,13 +1,13 @@
 ﻿#include "pch.h"
-#include "SampleFpsTextRenderer.h"
 
+#include "SampleFpsTextRenderer.h"
 #include "Common/DirectXHelper.h"
 
 using namespace Dx11Preview;
 using namespace Microsoft::WRL;
 
 // Initializes D2D resources used for text rendering.
-SampleFpsTextRenderer::SampleFpsTextRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) : 
+SampleFpsTextRenderer::SampleFpsTextRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_text(L""),
 	m_deviceResources(deviceResources)
 {
@@ -25,20 +25,14 @@ SampleFpsTextRenderer::SampleFpsTextRenderer(const std::shared_ptr<DX::DeviceRes
 			32.0f,
 			L"en-US",
 			&textFormat
-			)
-		);
+		)
+	);
 
-	DX::ThrowIfFailed(
-		textFormat.As(&m_textFormat)
-		);
+	DX::ThrowIfFailed(textFormat.As(&m_textFormat));
 
-	DX::ThrowIfFailed(
-		m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)
-		);
+	DX::ThrowIfFailed(m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR));
 
-	DX::ThrowIfFailed(
-		m_deviceResources->GetD2DFactory()->CreateDrawingStateBlock(&m_stateBlock)
-		);
+	DX::ThrowIfFailed(m_deviceResources->GetD2DFactory()->CreateDrawingStateBlock(&m_stateBlock));
 
 	CreateDeviceDependentResources();
 }
@@ -55,21 +49,17 @@ void SampleFpsTextRenderer::Update(DX::StepTimer const& timer)
 	DX::ThrowIfFailed(
 		m_deviceResources->GetDWriteFactory()->CreateTextLayout(
 			m_text.c_str(),
-			(uint32) m_text.length(),
+			(uint32)m_text.length(),
 			m_textFormat.Get(),
 			240.0f, // Max width of the input text.
 			50.0f, // Max height of the input text.
 			&textLayout
-			)
-		);
+		)
+	);
 
-	DX::ThrowIfFailed(
-		textLayout.As(&m_textLayout)
-		);
+	DX::ThrowIfFailed(textLayout.As(&m_textLayout));
 
-	DX::ThrowIfFailed(
-		m_textLayout->GetMetrics(&m_textMetrics)
-		);
+	DX::ThrowIfFailed(m_textLayout->GetMetrics(&m_textMetrics));
 }
 
 // Renders a frame to the screen.
@@ -85,19 +75,13 @@ void SampleFpsTextRenderer::Render()
 	D2D1::Matrix3x2F screenTranslation = D2D1::Matrix3x2F::Translation(
 		logicalSize.Width - m_textMetrics.layoutWidth,
 		logicalSize.Height - m_textMetrics.height
-		);
+	);
 
 	context->SetTransform(screenTranslation * m_deviceResources->GetOrientationTransform2D());
 
-	DX::ThrowIfFailed(
-		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING)
-		);
+	DX::ThrowIfFailed(m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING));
 
-	context->DrawTextLayout(
-		D2D1::Point2F(0.f, 0.f),
-		m_textLayout.Get(),
-		m_whiteBrush.Get()
-		);
+	context->DrawTextLayout(D2D1::Point2F(0.f, 0.f), m_textLayout.Get(), m_whiteBrush.Get());
 
 	// Ignore D2DERR_RECREATE_TARGET here. This error indicates that the device
 	// is lost. It will be handled during the next call to Present.
@@ -114,7 +98,7 @@ void SampleFpsTextRenderer::CreateDeviceDependentResources()
 {
 	DX::ThrowIfFailed(
 		m_deviceResources->GetD2DDeviceContext()->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &m_whiteBrush)
-		);
+	);
 }
 void SampleFpsTextRenderer::ReleaseDeviceDependentResources()
 {

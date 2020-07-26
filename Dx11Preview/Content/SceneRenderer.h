@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\Common\DeviceResources.h"
+#include "../Common/DeviceResources.h"
 #include "ShaderStructures.h"
 
 #include <vector>
@@ -32,7 +32,7 @@ namespace Dx11Preview
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 		bool m_ready;
 
-		// Direct3D resources for cube geometry.
+		// Direct3D resources for model geometry.
 		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_inputLayout;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_vertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_indexBufferTriangles;
@@ -40,10 +40,10 @@ namespace Dx11Preview
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
-		
+
 		std::mutex m_dxBuffersMutex;
 
-		// System resources for cube geometry.
+		// System resources for model geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCountTriangles;
 		uint32	m_indexCountLines;

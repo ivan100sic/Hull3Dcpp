@@ -1,6 +1,7 @@
 #include "pch.h"
+
+#include "../Common/DirectXHelper.h"
 #include "SceneRenderer.h"
-#include "..\Common\DirectXHelper.h"
 
 using namespace Dx11Preview;
 
@@ -145,7 +146,7 @@ void Dx11Preview::SceneRenderer::RecreateScene(const RenderingScene& scene)
 	// Set up m_vertexBuffer
 	if (scene.sceneVertices.size())
 	{
-		UINT vertexBufferSz = static_cast<UINT>(scene.sceneVertices.size() * sizeof(VertexPositionColor));
+		UINT vertexBufferSz = (UINT)(scene.sceneVertices.size() * sizeof(VertexPositionColor));
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
 		vertexBufferData.pSysMem = scene.sceneVertices.data();
@@ -162,11 +163,11 @@ void Dx11Preview::SceneRenderer::RecreateScene(const RenderingScene& scene)
 	}
 
 	// Set up m_indexBufferTriangles
-	m_indexCountTriangles = static_cast<unsigned int>(scene.sceneTriangleIndices.size());
+	m_indexCountTriangles = (unsigned int)(scene.sceneTriangleIndices.size());
 
 	if (m_indexCountTriangles)
 	{
-		UINT indexBufferSz = static_cast<UINT>(scene.sceneTriangleIndices.size() * sizeof(unsigned short));
+		UINT indexBufferSz = (UINT)(scene.sceneTriangleIndices.size() * sizeof(unsigned short));
 
 		D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
 		indexBufferData.pSysMem = scene.sceneTriangleIndices.data();
@@ -181,13 +182,13 @@ void Dx11Preview::SceneRenderer::RecreateScene(const RenderingScene& scene)
 			)
 		);
 	}
-	
+
 	// Set up m_indexBufferLines
-	m_indexCountLines = static_cast<unsigned int>(scene.sceneLineIndices.size());
+	m_indexCountLines = (unsigned int)(scene.sceneLineIndices.size());
 
 	if (m_indexCountLines)
 	{
-		UINT indexBufferSz = static_cast<UINT>(scene.sceneLineIndices.size() * sizeof(unsigned short));
+		UINT indexBufferSz = (UINT)(scene.sceneLineIndices.size() * sizeof(unsigned short));
 
 		D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
 		indexBufferData.pSysMem = scene.sceneLineIndices.data();
@@ -203,4 +204,3 @@ void Dx11Preview::SceneRenderer::RecreateScene(const RenderingScene& scene)
 		);
 	}
 }
-

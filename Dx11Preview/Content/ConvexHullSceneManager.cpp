@@ -56,15 +56,15 @@ namespace Dx11Preview {
 
 		if (!m_computeThread.joinable())
 		{
-			auto computeCallback = [this](convex_hull_update updateType, std::shared_ptr<hullgraph::vertex<input_point>> newVertex) {
+			auto computeCallback = [this](auto updateType, const auto& newVertex) {
 				if (updateType != convex_hull_update::afterRemoveRedundantVertices &&
-				    updateType != convex_hull_update::initialTetrahedron)
+					updateType != convex_hull_update::initialTetrahedron)
 				{
 					return;
 				}
 
 				std::unique_lock<std::mutex> lock(m_dataMutex);
-				
+
 				m_hullVertex = newVertex;
 
 				// Only continue when SimulationStep is called again
@@ -117,8 +117,8 @@ namespace Dx11Preview {
 		};
 
 		RenderingScene scene;
-		
-		auto addEdgeToScene = [&](auto& edge, auto color) {
+
+		auto addEdgeToScene = [&](const auto& edge, const auto& color) {
 			size_t u = edge->origin()->data().label;
 			size_t v = edge->destination()->data().label;
 
@@ -130,7 +130,7 @@ namespace Dx11Preview {
 			float vy = m_inputPoints[v].y;
 			float vz = m_inputPoints[v].z;
 
-			unsigned short baseIdx = static_cast<unsigned short>(scene.sceneVertices.size());
+			auto baseIdx = (unsigned short)scene.sceneVertices.size();
 			scene.sceneVertices.push_back({ XMFLOAT3{ ux, uy, uz }, color });
 			scene.sceneVertices.push_back({ XMFLOAT3{ vx, vy, vz }, color });
 			scene.sceneLineIndices.push_back(baseIdx);
@@ -140,7 +140,7 @@ namespace Dx11Preview {
 		auto allEdges = exploreGraph(m_hullVertex);
 
 		// Generate line segments corresponding to convex hull edges
-		for (auto& edge : allEdges)
+		for (const auto& edge : allEdges)
 		{
 			auto thisEdgeColor = m_previousStepEdges.count(edge) ? edgeColor : newEdgeColor;
 			addEdgeToScene(edge, thisEdgeColor);
@@ -152,7 +152,7 @@ namespace Dx11Preview {
 			float x = m_inputPoints[i].x;
 			float y = m_inputPoints[i].y;
 			float z = m_inputPoints[i].z;
-			unsigned short baseIdx = static_cast<unsigned short>(scene.sceneVertices.size());
+			auto baseIdx = (unsigned short)scene.sceneVertices.size();
 			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y - cubeSize, z - cubeSize }, cubeColor });
 			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y - cubeSize, z + cubeSize }, cubeColor });
 			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y + cubeSize, z - cubeSize }, cubeColor });
