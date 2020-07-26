@@ -4,6 +4,7 @@
 #include "../ConvexHull3D/hullgraph.h"
 #include "../ConvexHull3D/hull3d.h"
 #include "../ConvexHull3D/delaunay.h"
+#include "../ConvexHull3D/voronoi.h"
 
 #include <set>
 
@@ -428,5 +429,14 @@ namespace ConvexHull3DUnitTests {
 		}
 	};
 
+	TEST_CLASS(VoronoiDiagramTests) {
+	public:
 
+		TEST_METHOD(VoronoiDiagramCompilesAndSeemsToWork) {
+			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10}, {17, 5} };
+			auto voronoiDiagram = computeVoronoiDiagram(pts);
+			Assert::IsTrue(voronoiDiagram.edgeList.size() == 6);
+			Assert::IsTrue(voronoiDiagram.pointList.size() == 7);
+		}
+	};
 }

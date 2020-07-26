@@ -27,5 +27,8 @@
     <ClInclude Include="delaunay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="voronoi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

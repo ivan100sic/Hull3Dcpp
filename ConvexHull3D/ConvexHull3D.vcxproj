@@ -82,6 +82,7 @@
     <ClInclude Include="hull3d.h" />
     <ClInclude Include="hullgraph.h" />
     <ClInclude Include="point.h" />
+    <ClInclude Include="voronoi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
