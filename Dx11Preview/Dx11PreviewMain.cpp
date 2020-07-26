@@ -37,7 +37,7 @@ Dx11PreviewMain::~Dx11PreviewMain()
 void Dx11PreviewMain::CreateWindowSizeDependentResources() 
 {
 	// TODO: Replace this with the size-dependent initialization of your app's content.
-	m_sceneRenderer->CreateWindowSizeDependentResources();
+	m_sceneRenderer->UpdateViewport();
 }
 
 // Updates the application state once per frame.

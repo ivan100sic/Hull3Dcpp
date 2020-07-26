@@ -21,7 +21,6 @@ namespace Dx11Preview
 	public:
 		SceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		void CreateDeviceDependentResources();
-		void CreateWindowSizeDependentResources();
 		void ReleaseDeviceDependentResources();
 		void Render();
 

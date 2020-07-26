@@ -17,6 +17,7 @@ namespace Dx11Preview
 		ConvexHullSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		void Update(DX::StepTimer const& timer);
 		void SimulationStep();
+		void UpdateViewport();
 
 	private:
 		void Rotate(float radians);
