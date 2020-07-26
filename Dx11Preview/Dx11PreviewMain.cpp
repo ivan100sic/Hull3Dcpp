@@ -14,8 +14,9 @@ Dx11PreviewMain::Dx11PreviewMain(const std::shared_ptr<DX::DeviceResources>& dev
 	// Register to be notified if the Device is lost or recreated
 	m_deviceResources->RegisterDeviceNotify(this);
 
-	// TODO: Replace this with your app's content initialization.
-	m_sceneRenderer = std::unique_ptr<ConvexHullSceneRenderer>(new ConvexHullSceneRenderer(m_deviceResources));
+	m_convexHullsceneRenderer = std::make_unique<ConvexHullSceneRenderer>(m_deviceResources);
+	m_voronoiDiagramSceneRenderer = std::make_unique<VoronoiDiagramSceneRenderer>(m_deviceResources);
+	m_renderingConvexHullScene = true;
 
 	m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 
@@ -37,7 +38,8 @@ Dx11PreviewMain::~Dx11PreviewMain()
 void Dx11PreviewMain::CreateWindowSizeDependentResources() 
 {
 	// TODO: Replace this with the size-dependent initialization of your app's content.
-	m_sceneRenderer->UpdateViewport();
+	m_convexHullsceneRenderer->UpdateViewport();
+	m_voronoiDiagramSceneRenderer->UpdateViewport();
 }
 
 // Updates the application state once per frame.
@@ -47,7 +49,7 @@ void Dx11PreviewMain::Update()
 	m_timer.Tick([&]()
 	{
 		// TODO: Replace this with your app's content update functions.
-		m_sceneRenderer->Update(m_timer);
+		m_convexHullsceneRenderer->Update(m_timer);
 		m_fpsTextRenderer->Update(m_timer);
 	});
 }
@@ -76,9 +78,15 @@ bool Dx11PreviewMain::Render()
 	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::Black);
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// Render the scene objects.
-	// TODO: Replace this with your app's content rendering functions.
-	m_sceneRenderer->Render();
+	if (m_renderingConvexHullScene)
+	{
+		m_convexHullsceneRenderer->Render();
+	}
+	else
+	{
+		m_voronoiDiagramSceneRenderer->Render();
+	}
+
 	m_fpsTextRenderer->Render();
 
 	return true;
@@ -86,23 +94,40 @@ bool Dx11PreviewMain::Render()
 
 void Dx11Preview::Dx11PreviewMain::SimulationStep()
 {
-	if (m_sceneRenderer)
+	if (m_renderingConvexHullScene)
 	{
-		m_sceneRenderer->SimulationStep();
+		if (m_convexHullsceneRenderer)
+		{
+			m_convexHullsceneRenderer->SimulationStep();
+		}
 	}
+	else
+	{
+		if (m_voronoiDiagramSceneRenderer)
+		{
+			m_voronoiDiagramSceneRenderer->InitializeScene();
+		}
+	}
+}
+
+void Dx11PreviewMain::ToggleRenderScene()
+{
+	m_renderingConvexHullScene ^= true;
 }
 
 // Notifies renderers that device resources need to be released.
 void Dx11PreviewMain::OnDeviceLost()
 {
-	m_sceneRenderer->ReleaseDeviceDependentResources();
+	m_convexHullsceneRenderer->ReleaseDeviceDependentResources();
+	m_voronoiDiagramSceneRenderer->ReleaseDeviceDependentResources();
 	m_fpsTextRenderer->ReleaseDeviceDependentResources();
 }
 
 // Notifies renderers that device resources may now be recreated.
 void Dx11PreviewMain::OnDeviceRestored()
 {
-	m_sceneRenderer->CreateDeviceDependentResources();
+	m_convexHullsceneRenderer->CreateDeviceDependentResources();
+	m_voronoiDiagramSceneRenderer->CreateDeviceDependentResources();
 	m_fpsTextRenderer->CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }

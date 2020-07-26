@@ -255,6 +255,7 @@
     <ClInclude Include="Content\ConvexHullSceneManager.h" />
     <ClInclude Include="Content\ConvexHullSceneRenderer.h" />
     <ClInclude Include="Content\SceneRenderer.h" />
+    <ClInclude Include="Content\VoronoiDiagramSceneRenderer.h" />
     <ClInclude Include="Dx11PreviewMain.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
     <ClInclude Include="Common\StepTimer.h" />
@@ -268,6 +269,7 @@
     <ClCompile Include="Content\ConvexHullSceneManager.cpp" />
     <ClCompile Include="Content\ConvexHullSceneRenderer.cpp" />
     <ClCompile Include="Content\SceneRenderer.cpp" />
+    <ClCompile Include="Content\VoronoiDiagramSceneRenderer.cpp" />
     <ClCompile Include="Dx11PreviewMain.cpp" />
     <ClCompile Include="Content\SampleFpsTextRenderer.cpp" />
     <ClCompile Include="pch.cpp">
