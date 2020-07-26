@@ -30,6 +30,7 @@ namespace Dx11Preview
 	protected:
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
+		bool m_ready;
 
 		// Direct3D resources for cube geometry.
 		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_inputLayout;
@@ -46,8 +47,5 @@ namespace Dx11Preview
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCountTriangles;
 		uint32	m_indexCountLines;
-
-		// Variables used with the rendering loop.
-		bool	m_loadingComplete;
 	};
 }

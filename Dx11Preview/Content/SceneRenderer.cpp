@@ -8,15 +8,17 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 
 Dx11Preview::SceneRenderer::SceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
-	m_loadingComplete(false),
 	m_indexCountTriangles(0),
-	m_deviceResources(deviceResources)
+	m_deviceResources(deviceResources),
+	m_ready(false)
 {
 	CreateDeviceDependentResources();
 }
 
 void Dx11Preview::SceneRenderer::CreateDeviceDependentResources()
 {
+	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
+
 	// Load shaders asynchronously.
 	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
 	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
@@ -70,15 +72,17 @@ void Dx11Preview::SceneRenderer::CreateDeviceDependentResources()
 		);
 		});
 
-	// Once both shaders are loaded, set m_loadingComplete so other methods know
+	// Wait until everything is done
 	(createPSTask && createVSTask).then([this]() {
-		m_loadingComplete = true;
+		m_ready = true;
 		});
 }
 
 void Dx11Preview::SceneRenderer::ReleaseDeviceDependentResources()
 {
-	m_loadingComplete = false;
+	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
+
+	m_ready = false;
 	m_vertexShader.Reset();
 	m_inputLayout.Reset();
 	m_pixelShader.Reset();
@@ -90,13 +94,12 @@ void Dx11Preview::SceneRenderer::ReleaseDeviceDependentResources()
 
 void Dx11Preview::SceneRenderer::Render()
 {
-	// Loading is asynchronous. Only draw geometry after it's loaded.
-	if (!m_loadingComplete)
+	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
+
+	if (!m_ready)
 	{
 		return;
 	}
-
-	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -132,12 +135,12 @@ void Dx11Preview::SceneRenderer::Render()
 
 void Dx11Preview::SceneRenderer::RecreateScene(const RenderingScene& scene)
 {
-	if (!m_loadingComplete)
+	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
+
+	if (!m_ready)
 	{
 		return;
 	}
-
-	std::unique_lock<std::mutex> lock(m_dxBuffersMutex);
 
 	// Set up m_vertexBuffer
 	if (scene.sceneVertices.size())
