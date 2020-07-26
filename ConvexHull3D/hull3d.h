@@ -12,7 +12,7 @@
 template<class Point>
 decltype(Point::x) facePointOrientation(std::shared_ptr<hullgraph::face<Point>> theFace, const Point& thePoint) {
 	Point points[3];
-	std::shared_ptr<hullgraph::edge<Point>> walkingEdge = theFace->outerComponent();
+	auto walkingEdge = theFace->outerComponent();
 	points[0] = walkingEdge->origin()->data();
 	walkingEdge = walkingEdge->next();
 	points[1] = walkingEdge->origin()->data();
@@ -221,13 +221,14 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 						pointToFaces[pointIdx].erase(adjacentFace);
 						pointToFaces[pointIdx].insert(mergedFace);
 					}
-				} else {
+				}
+				else {
 					// Check the union of the two faces around this edge
 					faceptr newTriangle = newVertexEdges[j]->incidentFace();
 					faceptr adjacentFace = newVertexEdges[j]->next()->twin()->incidentFace();
 					std::unordered_set<size_t> newConflicts;
 
-					for (const faceptr& interestingFace : {joinResult.borderFaces[j], adjacentFace}) {
+					for (const faceptr& interestingFace : { joinResult.borderFaces[j], adjacentFace }) {
 						auto mapIt = faceToPoints.find(interestingFace);
 						if (mapIt != faceToPoints.end()) {
 							for (size_t pointIdx : mapIt->second) {
@@ -274,6 +275,6 @@ std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<
 }
 
 template<class Point>
-std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<Point> & points) {
-	return computeConvexHull3D(points, [](convex_hull_update, std::shared_ptr<hullgraph::vertex<Point>>) {});
+std::shared_ptr<hullgraph::vertex<Point>> computeConvexHull3D(const std::vector<Point>& points) {
+	return computeConvexHull3D(points, [](convex_hull_update, const std::shared_ptr<hullgraph::vertex<Point>>&) {});
 }

@@ -145,8 +145,8 @@ namespace hullgraph {
 		}
 
 		std::vector<std::shared_ptr<edge<T>>> edges;
-		std::shared_ptr<edge<T>> startEdge = theFace->outerComponent();
-		std::shared_ptr<edge<T>> currEdge = startEdge;
+		auto startEdge = theFace->outerComponent();
+		auto currEdge = startEdge;
 
 		do {
 			if (!currEdge) {
@@ -171,8 +171,8 @@ namespace hullgraph {
 		}
 
 		std::vector<std::shared_ptr<edge<T>>> edges;
-		std::shared_ptr<edge<T>> startEdge = theVertex->incidentEdge();
-		std::shared_ptr<edge<T>> currEdge = startEdge;
+		auto startEdge = theVertex->incidentEdge();
+		auto currEdge = startEdge;
 
 		do {
 			if (!currEdge) {
@@ -243,8 +243,8 @@ namespace hullgraph {
 
 		size_t queueStart = 0;
 		while (queueStart != edgesQueue.size()) {
-			std::shared_ptr<edge<T>> currEdge = edgesQueue[queueStart++];
-			for (const std::shared_ptr<edge<T>>& newEdge : { currEdge->twin(), currEdge->next(), currEdge->prev() }) {
+			auto currEdge = edgesQueue[queueStart++];
+			for (const auto& newEdge : { currEdge->twin(), currEdge->next(), currEdge->prev() }) {
 				if (visitedEdges.count(newEdge) == 0) {
 					visitedEdges.insert(newEdge);
 					edgesQueue.push_back(newEdge);
@@ -260,14 +260,14 @@ namespace hullgraph {
 	 */
 	template<class T>
 	bool hasDegreeTwo(const std::shared_ptr<vertex<T>>& theVertex) {
-		std::shared_ptr<edge<T>> firstEdge = theVertex->incidentEdge();
-		std::shared_ptr<edge<T>> secondEdge = firstEdge->twin()->next();
+		auto firstEdge = theVertex->incidentEdge();
+		auto secondEdge = firstEdge->twin()->next();
 
 		if (firstEdge == secondEdge) {
 			return false;
 		}
 
-		std::shared_ptr<edge<T>> thirdEdge = secondEdge->twin()->next();
+		auto thirdEdge = secondEdge->twin()->next();
 
 		return firstEdge == thirdEdge;
 	}
@@ -282,8 +282,8 @@ namespace hullgraph {
 				return nullptr;
 			}
 
-			std::shared_ptr<face<T>> innerFace = std::make_shared<face<T>>();
-			std::shared_ptr<face<T>> outerFace = std::make_shared<face<T>>();
+			auto innerFace = std::make_shared<face<T>>();
+			auto outerFace = std::make_shared<face<T>>();
 
 			if (!innerFace || !outerFace) {
 				return nullptr;
@@ -332,14 +332,14 @@ namespace hullgraph {
 		}
 
 		static std::shared_ptr<vertex<T>> inscribeVertex(const std::shared_ptr<face<T>>& oldFace, const T& data) {
-			std::vector<std::shared_ptr<edge<T>>> edges = faceToEdgeList(oldFace);
+			auto edges = faceToEdgeList(oldFace);
 			size_t degree = edges.size();
 
 			if (!degree) {
 				return nullptr;
 			}
 
-			std::shared_ptr<vertex<T>> newVertex = std::make_shared<vertex<T>>();
+			auto newVertex = std::make_shared<vertex<T>>();
 			if (!newVertex) {
 				return nullptr;
 			}
@@ -392,14 +392,14 @@ namespace hullgraph {
 		}
 
 		static std::shared_ptr<face<T>> removeEdge(const std::shared_ptr<edge<T>>& halfEdge) {
-			std::shared_ptr<face<T>> newFace = std::make_shared<face<T>>();
+			auto newFace = std::make_shared<face<T>>();
 
 			if (!newFace) {
 				return nullptr;
 			}
 
-			std::shared_ptr<vertex<T>> u = halfEdge->origin();
-			std::shared_ptr<vertex<T>> v = halfEdge->destination();
+			auto u = halfEdge->origin();
+			auto v = halfEdge->destination();
 
 			// If u or v has degree two, first remove that vertex
 			if (hasDegreeTwo(u)) {
@@ -410,25 +410,25 @@ namespace hullgraph {
 				return removeEdge(removeRedundantVertex(v));
 			}
 
-			std::shared_ptr<edge<T>> twinEdge = halfEdge->twin();
-			std::shared_ptr<edge<T>> fromU = twinEdge->next();
-			std::shared_ptr<edge<T>> toU = halfEdge->prev();
-			std::shared_ptr<edge<T>> fromV = halfEdge->next();
-			std::shared_ptr<edge<T>> toV = twinEdge->prev();
+			auto twinEdge = halfEdge->twin();
+			auto fromU = twinEdge->next();
+			auto toU = halfEdge->prev();
+			auto fromV = halfEdge->next();
+			auto toV = twinEdge->prev();
 
-			std::shared_ptr<face<T>> upperFace = halfEdge->incidentFace();
-			std::shared_ptr<face<T>> lowerFace = twinEdge->incidentFace();
+			auto upperFace = halfEdge->incidentFace();
+			auto lowerFace = twinEdge->incidentFace();
 
-			std::vector<std::shared_ptr<edge<T>>> upperFaceEdges = faceToEdgeList(upperFace);
-			std::vector<std::shared_ptr<edge<T>>> lowerFaceEdges = faceToEdgeList(lowerFace);
+			auto upperFaceEdges = faceToEdgeList(upperFace);
+			auto lowerFaceEdges = faceToEdgeList(lowerFace);
 
 			newFace->m_outerComponent = fromV;
 
-			for (const std::shared_ptr<edge<T>>& upperFaceEdge : upperFaceEdges) {
+			for (const auto& upperFaceEdge : upperFaceEdges) {
 				upperFaceEdge->m_incidentFace = newFace;
 			}
 
-			for (const std::shared_ptr<edge<T>>& lowerFaceEdge : lowerFaceEdges) {
+			for (const auto& lowerFaceEdge : lowerFaceEdges) {
 				lowerFaceEdge->m_incidentFace = newFace;
 			}
 
@@ -458,8 +458,8 @@ namespace hullgraph {
 			}
 
 			// Remove tags from all vertices and edges (both half-edges and twins)
-			for (const std::shared_ptr<face<T>>& facePtr : faces) {
-				for (const std::shared_ptr<edge<T>>& edgePtr : faceToEdgeList(facePtr)) {
+			for (const auto& facePtr : faces) {
+				for (const auto& edgePtr : faceToEdgeList(facePtr)) {
 					edgePtr->m_tag = 0;
 					edgePtr->twin()->m_tag = 0;
 					edgePtr->origin()->m_tag = 0;
@@ -467,20 +467,20 @@ namespace hullgraph {
 			}
 
 			// Tag all half-edges
-			for (const std::shared_ptr<face<T>>& facePtr : faces) {
-				for (const std::shared_ptr<edge<T>>& edgePtr : faceToEdgeList(facePtr)) {
+			for (const auto& facePtr : faces) {
+				for (const auto& edgePtr : faceToEdgeList(facePtr)) {
 					edgePtr->m_tag = 1;
 				}
 			}
 
 			// The half-edges whose twins are not tagged form the border of the new face
-			std::vector<std::shared_ptr<edge<T>>>& borderEdges = result.borderEdges;
+			auto& borderEdges = result.borderEdges;
 			std::shared_ptr<edge<T>> startEdge;
 
 			// Find a starting edge
-			for (const std::shared_ptr<face<T>>& facePtr : faces) {
+			for (const auto& facePtr : faces) {
 				bool found = false;
-				for (const std::shared_ptr<edge<T>>& edgePtr : faceToEdgeList(facePtr)) {
+				for (const auto& edgePtr : faceToEdgeList(facePtr)) {
 					if (edgePtr->twin()->m_tag == 0) {
 						startEdge = edgePtr;
 						found = true;
@@ -494,7 +494,7 @@ namespace hullgraph {
 			}
 
 			// Walk around to find the border
-			std::shared_ptr<edge<T>> currEdge = startEdge;
+			auto currEdge = startEdge;
 
 			do {
 				result.borderEdges.push_back(currEdge);
@@ -508,15 +508,15 @@ namespace hullgraph {
 			} while (currEdge != startEdge);
 
 			// We have the border, tag all the vertices on it
-			for (const std::shared_ptr<edge<T>> borderEdge : borderEdges) {
+			for (const auto& borderEdge : borderEdges) {
 				borderEdge->origin()->m_tag = 1;
 			}
 
 			std::unordered_set<std::shared_ptr<vertex<T>>> removedVerticesSet;
 
 			// Process all vertices and edges ready for removal
-			for (const std::shared_ptr<face<T>>& facePtr : faces) {
-				for (const std::shared_ptr<edge<T>>& edgePtr : faceToEdgeList(facePtr)) {
+			for (const auto& facePtr : faces) {
+				for (const auto& edgePtr : faceToEdgeList(facePtr)) {
 					if (edgePtr->twin()->m_tag == 1) {
 						result.removedEdges.push_back(edgePtr);
 					}
@@ -530,15 +530,15 @@ namespace hullgraph {
 			result.removedVertices.assign(removedVerticesSet.begin(), removedVerticesSet.end());
 
 			// Invalidate removed objects
-			for (const std::shared_ptr<vertex<T>>& removedVertex : result.removedVertices) {
+			for (const auto& removedVertex : result.removedVertices) {
 				removedVertex->invalidate();
 			}
 
-			for (const std::shared_ptr<edge<T>>& removedEdge : result.removedEdges) {
+			for (const auto& removedEdge : result.removedEdges) {
 				removedEdge->invalidate();
 			}
 
-			for (const std::shared_ptr<face<T>>& removedFace : faces) {
+			for (const auto& removedFace : faces) {
 				removedFace->invalidate();
 			}
 
@@ -559,27 +559,27 @@ namespace hullgraph {
 		}
 
 		static std::shared_ptr<edge<T>> removeRedundantVertex(const std::shared_ptr<vertex<T>>& theVertex) {
-			std::shared_ptr<edge<T>> outEdge1 = theVertex->incidentEdge();
-			std::shared_ptr<edge<T>> outEdge1twin = outEdge1->twin();
-			std::shared_ptr<edge<T>> outEdge2 = outEdge1twin->next();
-			std::shared_ptr<edge<T>> outEdge2twin = outEdge2->twin();
+			auto outEdge1 = theVertex->incidentEdge();
+			auto outEdge1twin = outEdge1->twin();
+			auto outEdge2 = outEdge1twin->next();
+			auto outEdge2twin = outEdge2->twin();
 
 			if (outEdge2twin->next() != outEdge1) {
 				// The degree is at least 3
 				return nullptr;
 			}
 
-			std::shared_ptr<edge<T>> newEdge = std::make_shared<edge<T>>();
-			std::shared_ptr<edge<T>> twinEdge = std::make_shared<edge<T>>();
+			auto newEdge = std::make_shared<edge<T>>();
+			auto twinEdge = std::make_shared<edge<T>>();
 
 			if (!newEdge || !twinEdge) {
 				return nullptr;
 			}
 
-			std::shared_ptr<edge<T>> nextEdge1 = outEdge1->next();
-			std::shared_ptr<edge<T>> nextEdge2 = outEdge2->next();
-			std::shared_ptr<edge<T>> prevEdge1 = outEdge1twin->prev();
-			std::shared_ptr<edge<T>> prevEdge2 = outEdge2twin->prev();
+			auto nextEdge1 = outEdge1->next();
+			auto nextEdge2 = outEdge2->next();
+			auto prevEdge1 = outEdge1twin->prev();
+			auto prevEdge2 = outEdge2twin->prev();
 
 			// Set up the new edge pair
 

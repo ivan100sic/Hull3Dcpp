@@ -4,28 +4,26 @@
 
 /*
  * Computes whether the given face looks up, i.e. whether its normal vector's z-value
- * is positive.
+ * is nonnegative.
  */
 template<class Point>
 bool isFaceDirectedUpOrVertical(const std::shared_ptr<hullgraph::face<Point>>& theFace) {
 	using F = decltype(Point::x);
 	point<F> points[3];
-	std::shared_ptr<hullgraph::edge<Point>> walkingEdge = theFace->outerComponent();
+	auto walkingEdge = theFace->outerComponent();
 	points[0] = walkingEdge->origin()->data();
 	walkingEdge = walkingEdge->next();
 	points[1] = walkingEdge->origin()->data();
 	points[2] = walkingEdge->destination()->data();
 
-	point<F> zPlus;
-	zPlus.x = zPlus.y = 0;
-	zPlus.z = F(1);
+	point<F> zPlus{ F(0), F(0), F(1) };
 
 	return determinant(points[1] - points[0], points[2] - points[0], zPlus) >= F(0);
 }
 
 /*
  * Computes the Delaunay triangulation of a set of points in the plane.
- * The template parameter Point should have two members x and y of the same type,
+ * The template parameter Point2D should have two members x and y of the same type,
  * which should be a numeric type. Returns the external face of the triangulation graph.
  */
 template<class Point2D>
@@ -42,11 +40,11 @@ std::shared_ptr<hullgraph::face<labeled_point<decltype(Point2D::x), size_t>>> de
 		paraboloidPoints[i].label = i;
 	}
 
-	std::shared_ptr<vertex<local_point>> theVertex = computeConvexHull3D(paraboloidPoints);
+	auto theVertex = computeConvexHull3D(paraboloidPoints);
 	auto allEdges = exploreGraph(theVertex);
 
 	std::unordered_set<std::shared_ptr<face<local_point>>> facesToJoinSet;
-	
+
 	// Join together all faces which look up
 	for (const auto& theEdge : allEdges) {
 		auto theFace = theEdge->incidentFace();

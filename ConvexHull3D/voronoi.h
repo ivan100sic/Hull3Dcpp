@@ -24,8 +24,8 @@ struct voronoi_diagram {
  */
 template<class Point>
 typename voronoi_diagram<decltype(Point::x)>::point circumcenter(
-	std::shared_ptr<hullgraph::edge<Point>> halfEdge,
-	std::shared_ptr<hullgraph::face<Point>> outerFace)
+	const std::shared_ptr<hullgraph::edge<Point>>& halfEdge,
+	const std::shared_ptr<hullgraph::face<Point>>& outerFace)
 {
 	using F = decltype(Point::x);
 	using vd_point = voronoi_diagram<F>::point;
@@ -39,7 +39,7 @@ typename voronoi_diagram<decltype(Point::x)>::point circumcenter(
 		result.x = b.y - a.y;
 		result.y = a.x - b.x;
 		result.atInfinity = true;
-		
+
 		return result;
 	}
 
@@ -77,7 +77,6 @@ voronoi_diagram<decltype(Point::x)> computeVoronoiDiagram(const std::shared_ptr<
 	using faceptr = std::shared_ptr<hullgraph::face<Point>>;
 	using edgeptr = std::shared_ptr<hullgraph::edge<Point>>;
 	using vertexptr = std::shared_ptr<hullgraph::vertex<Point>>;
-	using vertexptr = std::shared_ptr<hullgraph::vertex<Point>>;
 	using vd_point = voronoi_diagram<F>::point;
 
 	voronoi_diagram<F> result;
@@ -89,7 +88,7 @@ voronoi_diagram<decltype(Point::x)> computeVoronoiDiagram(const std::shared_ptr<
 
 	auto allEdges = exploreGraph(outerFace->outerComponent()->origin());
 
-	for (auto& theEdge : allEdges) {
+	for (const auto& theEdge : allEdges) {
 		auto theFace = theEdge->incidentFace();
 		if (theFace != outerFace) {
 			auto it = internalFaceToPointIdx.find(theFace);
@@ -106,7 +105,7 @@ voronoi_diagram<decltype(Point::x)> computeVoronoiDiagram(const std::shared_ptr<
 		}
 	}
 
-	for (auto& theEdge : allEdges) {
+	for (const auto& theEdge : allEdges) {
 		auto twinEdge = theEdge->twin();
 
 		// Ensure that we process edge/twin edge pair exactly once
