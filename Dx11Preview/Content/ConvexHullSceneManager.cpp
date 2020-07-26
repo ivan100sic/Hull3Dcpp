@@ -76,7 +76,7 @@ namespace Dx11Preview {
 				computeConvexHull3D(m_inputPoints, computeCallback);
 				});
 
-			return {};
+			return GenerateScene();
 		}
 		else
 		{
@@ -89,11 +89,6 @@ namespace Dx11Preview {
 
 	RenderingScene ConvexHullSceneManager::GenerateScene()
 	{
-		if (!m_hullVertex)
-		{
-			return {};
-		}
-
 		using DirectX::XMFLOAT3;
 		const float cubeSize = 0.007f;
 		XMFLOAT3 cubeColor{ 1.0f, 0.0f, 0.0f };
@@ -117,6 +112,33 @@ namespace Dx11Preview {
 		};
 
 		RenderingScene scene;
+
+		// Generate vertices corresponding to input point cubes
+		for (size_t i = 0; i < m_inputPoints.size(); i++)
+		{
+			float x = m_inputPoints[i].x;
+			float y = m_inputPoints[i].y;
+			float z = m_inputPoints[i].z;
+			auto baseIdx = (unsigned short)scene.sceneVertices.size();
+			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y - cubeSize, z - cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y - cubeSize, z + cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y + cubeSize, z - cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y + cubeSize, z + cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y - cubeSize, z - cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y - cubeSize, z + cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y + cubeSize, z - cubeSize }, cubeColor });
+			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y + cubeSize, z + cubeSize }, cubeColor });
+
+			for (size_t j = 0; j < std::size(cubeIdxOffsets); j++)
+			{
+				scene.sceneTriangleIndices.push_back(cubeIdxOffsets[j] + baseIdx);
+			}
+		}
+
+		if (!m_hullVertex)
+		{
+			return scene;
+		}
 
 		auto addEdgeToScene = [&](const auto& edge, const auto& color) {
 			size_t u = edge->origin()->data().label;
@@ -144,28 +166,6 @@ namespace Dx11Preview {
 		{
 			auto thisEdgeColor = m_previousStepEdges.count(edge) ? edgeColor : newEdgeColor;
 			addEdgeToScene(edge, thisEdgeColor);
-		}
-
-		// Generate vertices corresponding to input point cubes
-		for (size_t i = 0; i < m_inputPoints.size(); i++)
-		{
-			float x = m_inputPoints[i].x;
-			float y = m_inputPoints[i].y;
-			float z = m_inputPoints[i].z;
-			auto baseIdx = (unsigned short)scene.sceneVertices.size();
-			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y - cubeSize, z - cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y - cubeSize, z + cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y + cubeSize, z - cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x - cubeSize, y + cubeSize, z + cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y - cubeSize, z - cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y - cubeSize, z + cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y + cubeSize, z - cubeSize }, cubeColor });
-			scene.sceneVertices.push_back({ XMFLOAT3{ x + cubeSize, y + cubeSize, z + cubeSize }, cubeColor });
-
-			for (size_t j = 0; j < std::size(cubeIdxOffsets); j++)
-			{
-				scene.sceneTriangleIndices.push_back(cubeIdxOffsets[j] + baseIdx);
-			}
 		}
 
 		m_previousStepEdges = decltype(m_previousStepEdges)(allEdges.begin(), allEdges.end());
