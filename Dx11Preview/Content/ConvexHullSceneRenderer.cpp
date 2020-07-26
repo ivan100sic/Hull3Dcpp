@@ -17,7 +17,7 @@ ConvexHullSceneRenderer::ConvexHullSceneRenderer(const std::shared_ptr<DX::Devic
 	UpdateViewport();
 }
 
-void Dx11Preview::ConvexHullSceneRenderer::UpdateViewport()
+void ConvexHullSceneRenderer::UpdateViewport()
 {
 	Size outputSize = m_deviceResources->GetOutputSize();
 	float aspectRatio = outputSize.Width / outputSize.Height;
@@ -78,7 +78,7 @@ void ConvexHullSceneRenderer::Rotate(float radians)
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
 
-void Dx11Preview::ConvexHullSceneRenderer::SimulationStep()
+void ConvexHullSceneRenderer::SimulationStep()
 {
 	if (!m_sceneManager) {
 		m_sceneManager = std::make_unique<ConvexHullSceneManager>(GenerateCubicLattice(5));

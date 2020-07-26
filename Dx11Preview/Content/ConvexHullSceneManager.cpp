@@ -4,7 +4,7 @@
 
 namespace Dx11Preview {
 
-	std::vector<input_point> Dx11Preview::GenerateRandomPoints(size_t numPoints)
+	std::vector<input_point> GenerateRandomPoints(size_t numPoints)
 	{
 		std::vector<input_point> result(numPoints);
 		static std::mt19937_64 randomEngine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
