@@ -1,9 +1,5 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "../ConvexHull3D/point.h"
-#include "../ConvexHull3D/hullgraph.h"
-#include "../ConvexHull3D/hull3d.h"
-#include "../ConvexHull3D/delaunay.h"
 #include "../ConvexHull3D/voronoi.h"
 
 #include <set>
@@ -51,48 +47,48 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(MakeTriangleCompiles) {
 			point<int> pts[3] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14} };
-			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
+			auto f = makeTriangle(pts[0], pts[1], pts[2]);
 			Assert::IsTrue(!!f);
 		}
 
 		TEST_METHOD(InscribePointCompiles) {
 			point<int> pts[4] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14}, {0, 0, 0} };
-			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
-			std::shared_ptr<vertex<point<int>>> newPoint = inscribeVertex(f, pts[3]);
+			auto f = makeTriangle(pts[0], pts[1], pts[2]);
+			auto newPoint = inscribeVertex(f, pts[3]);
 			Assert::IsTrue(!!f);
 			Assert::IsTrue(!!newPoint);
 		}
 
 		TEST_METHOD(FaceToEdgeListTriangle) {
 			point<int> pts[3] = { {0, 1, 2}, {4, 7, 10}, {6, 10, 14} };
-			std::shared_ptr<face<point<int>>> f = makeTriangle(pts[0], pts[1], pts[2]);
+			auto f = makeTriangle(pts[0], pts[1], pts[2]);
 			Assert::IsTrue(faceToEdgeList(f).size() == 3);
 		}
 
 		TEST_METHOD(InscribePointAppearsToWork) {
-			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
-			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
-			std::vector<std::shared_ptr<edge<int>>> newPointEdges = adjacentEdges(newPoint);
+			auto f = makeTriangle(0, 1, 2);
+			auto newPoint = inscribeVertex(f, 3);
+			auto newPointEdges = adjacentEdges(newPoint);
 			Assert::AreEqual(3, (int)newPointEdges.size());
 		}
 
 		TEST_METHOD(RemoveEdgeCompilesAndAppearsToWork) {
-			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
-			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
-			std::shared_ptr<face<int>> newFace = removeEdge(newPoint->incidentEdge());
+			auto f = makeTriangle(0, 1, 2);
+			auto newPoint = inscribeVertex(f, 3);
+			auto newFace = removeEdge(newPoint->incidentEdge());
 			Assert::IsTrue(!!newFace);
 			Assert::AreEqual(4, (int)faceToEdgeList(newFace).size());
 		}
 
 		TEST_METHOD(JoinFacesCompilesAndAppearsToWork) {
-			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
-			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
+			auto f = makeTriangle(0, 1, 2);
+			auto newPoint = inscribeVertex(f, 3);
 			std::vector<std::shared_ptr<face<int>>> faces = {
 				newPoint->incidentEdge()->incidentFace(),
 				newPoint->incidentEdge()->twin()->incidentFace()
 			};
 
-			join_faces_result<int> result = joinFaces(faces);
+			auto result = joinFaces(faces);
 
 			Assert::IsTrue(!!result.newFace);
 			Assert::AreEqual(0, (int)result.removedVertices.size());
@@ -103,29 +99,29 @@ namespace ConvexHull3DUnitTests {
 		}
 
 		TEST_METHOD(RemoveRedundantVertexCompilesAndReturnsNull) {
-			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
-			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
-			std::shared_ptr<edge<int>> result = removeRedundantVertex(newPoint);
+			auto f = makeTriangle(0, 1, 2);
+			auto newPoint = inscribeVertex(f, 3);
+			auto result = removeRedundantVertex(newPoint);
 
 			Assert::IsTrue(!result);
 		}
 
 		TEST_METHOD(RemoveRedundantVertexCompilesAndAppearsToWork) {
-			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
-			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
-			std::shared_ptr<edge<int>> someEdge = newPoint->incidentEdge();
-			std::shared_ptr<vertex<int>> otherPoint = someEdge->destination();
-			std::shared_ptr<face<int>> newFace = removeEdge(someEdge);
-			std::shared_ptr<edge<int>> bridge = removeRedundantVertex(otherPoint);
+			auto f = makeTriangle(0, 1, 2);
+			auto newPoint = inscribeVertex(f, 3);
+			auto someEdge = newPoint->incidentEdge();
+			auto otherPoint = someEdge->destination();
+			auto newFace = removeEdge(someEdge);
+			auto bridge = removeRedundantVertex(otherPoint);
 
 			Assert::AreEqual(3, (int)faceToEdgeList(bridge->incidentFace()).size());
 			Assert::AreEqual(2, (int)faceToEdgeList(bridge->twin()->incidentFace()).size());
 		}
 
 		TEST_METHOD(ExploreGraphCompilesAndAppearsToWork) {
-			std::shared_ptr<face<int>> f = makeTriangle(0, 1, 2);
-			std::shared_ptr<vertex<int>> newPoint = inscribeVertex(f, 3);
-			std::vector<std::shared_ptr<edge<int>>> allEdges = exploreGraph(newPoint);
+			auto f = makeTriangle(0, 1, 2);
+			auto newPoint = inscribeVertex(f, 3);
+			auto allEdges = exploreGraph(newPoint);
 
 			Assert::AreEqual(12, (int)allEdges.size());
 
@@ -138,7 +134,7 @@ namespace ConvexHull3DUnitTests {
 				}
 			}
 
-			for (const std::shared_ptr<edge<int>>& theEdge : allEdges) {
+			for (const auto& theEdge : allEdges) {
 				pendingEdges.erase({ theEdge->origin()->data(), theEdge->destination()->data() });
 			}
 
@@ -151,16 +147,16 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(ComputeConvexHull3DCompiles) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			auto hullVertex = computeConvexHull3D(pts);
 			Assert::IsTrue(!!hullVertex);
 		}
 
 		TEST_METHOD(VerifyConvexHullOrientation) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			auto hullVertex = computeConvexHull3D(pts);
 			point<int> pt = { 1, 1, 1 };
 			
-			std::vector<std::shared_ptr<edge<point<int>>>> faceEdges = faceToEdgeList(hullVertex->incidentEdge()->incidentFace());
+			auto faceEdges = faceToEdgeList(hullVertex->incidentEdge()->incidentFace());
 			std::vector<point<int>> facePoints(faceEdges.size());
 
 			Assert::AreEqual(3, (int)faceEdges.size());
@@ -184,8 +180,8 @@ namespace ConvexHull3DUnitTests {
 			}
 
 			for (size_t repetition = 0; repetition < 100; repetition++) {
-				std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-				std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+				auto hullVertex = computeConvexHull3D(pts);
+				auto allEdges = exploreGraph(hullVertex);
 				Assert::AreEqual(24, (int)allEdges.size());
 			}
 		}
@@ -198,8 +194,8 @@ namespace ConvexHull3DUnitTests {
 				}
 			}
 
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 		}
 
 		TEST_METHOD(Hull3DSphere) {
@@ -220,27 +216,27 @@ namespace ConvexHull3DUnitTests {
 				pts[i] = { x, y, z };
 			}
 
-			std::shared_ptr<vertex<point<double>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<double>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 
 			Assert::AreEqual(6 * numPoints - 12, (int)allEdges.size());
 		}
 
 		TEST_METHOD(Hull3DTetrahedron1) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {1, 1, 1} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
+			auto hullVertex = computeConvexHull3D(pts);
 
 			Assert::AreEqual(12, (int)exploreGraph(hullVertex).size());
 		}
 
 		TEST_METHOD(Hull3DTetrahedron2) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {-100, -100, -100} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 
 			Assert::AreEqual(12, (int)allEdges.size());
 
-			for (const std::shared_ptr<edge<point<int>>>& theEdge : allEdges) {
+			for (const auto& theEdge : allEdges) {
 				if (theEdge->origin()->data() == point<int>{0, 0, 0}) {
 					Assert::Fail();
 				}
@@ -249,16 +245,16 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(Hull3DTetrahedron3) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {6, 6, 6} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 
 			Assert::AreEqual(18, (int)allEdges.size());
 		}
 
 		TEST_METHOD(Hull3DTriangularDipyramid1) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {6, 6, 6}, {7, 7, 7} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 
 			Assert::AreEqual(18, (int)allEdges.size());
 		}
@@ -268,13 +264,13 @@ namespace ConvexHull3DUnitTests {
 			for (int t = 6; t <= 100; t++) {
 				pts.push_back({ t, t, t });
 			}
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 
 			Assert::AreEqual(18, (int)allEdges.size());
 
-			for (const std::shared_ptr<edge<point<int>>>& theEdge : allEdges) {
-				point<int> thePoint = theEdge->origin()->data();
+			for (const auto& theEdge : allEdges) {
+				auto thePoint = theEdge->origin()->data();
 				if (thePoint.x % 10 + thePoint.y % 10 + thePoint.z % 10 != 0) {
 					Assert::Fail();
 				}
@@ -283,22 +279,22 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(Hull3DPlanar1) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {0, 1, 10}, {2, 5, 4} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::vector<std::shared_ptr<edge<point<int>>>> allEdges = exploreGraph(hullVertex);
+			auto hullVertex = computeConvexHull3D(pts);
+			auto allEdges = exploreGraph(hullVertex);
 			Assert::AreEqual(6, (int)allEdges.size());
 		}
 
 		TEST_METHOD(Hull3DPlanar2) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {0, 0, 10}, {0, 10, 0}, {0, 10, 10}, {0, 5, 5} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::shared_ptr<face<point<int>>> hullFace = hullVertex->incidentEdge()->incidentFace();
+			auto hullVertex = computeConvexHull3D(pts);
+			auto hullFace = hullVertex->incidentEdge()->incidentFace();
 			Assert::AreEqual(4, (int)faceToEdgeList(hullFace).size());
 		}
 
 		TEST_METHOD(Hull3DPlanar3) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {0, 0, 10}, {0, 10, 0}, {0, 10, 10}, {0, 5, 5}, {0, 13, 5} };
-			std::shared_ptr<vertex<point<int>>> hullVertex = computeConvexHull3D(pts);
-			std::shared_ptr<face<point<int>>> hullFace = hullVertex->incidentEdge()->incidentFace();
+			auto hullVertex = computeConvexHull3D(pts);
+			auto hullFace = hullVertex->incidentEdge()->incidentFace();
 			Assert::AreEqual(5, (int)faceToEdgeList(hullFace).size());
 		}
 	};
@@ -308,25 +304,25 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(IsFaceDirectedUpTest1) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, 0, 10} };
-			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
+			auto triangle = makePolygon(pts);
 			Assert::IsTrue(isFaceDirectedUpOrVertical(triangle));
 		}
 
 		TEST_METHOD(IsFaceDirectedUpTest2) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, 1, 10} };
-			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
+			auto triangle = makePolygon(pts);
 			Assert::IsTrue(isFaceDirectedUpOrVertical(triangle));
 		}
 
 		TEST_METHOD(IsFaceDirectedUpTest3) {
 			std::vector<point<int>> pts = { {0, 0, 0}, {10, 0, 0}, {10, -1, 10} };
-			std::shared_ptr<face<point<int>>> triangle = makePolygon(pts);
+			auto triangle = makePolygon(pts);
 			Assert::IsFalse(isFaceDirectedUpOrVertical(triangle));
 		}
 
 		TEST_METHOD(DelaunayTriangulationBasicTest1) {
 			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {6, 6} };
-			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			auto extFace = delaunayTriangulation(pts);
 			Assert::AreEqual(4, (int)faceToEdgeList(extFace).size());
 
 			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3} };
@@ -346,7 +342,7 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(DelaunayTriangulationBasicTest2) {
 			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {13, 13} };
-			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			auto extFace = delaunayTriangulation(pts);
 			Assert::AreEqual(4, (int)faceToEdgeList(extFace).size());
 
 			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3} };
@@ -366,7 +362,7 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(DelaunayTriangulationBasicTest3) {
 			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10}, {17, 5} };
-			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			auto extFace = delaunayTriangulation(pts);
 			Assert::AreEqual(5, (int)faceToEdgeList(extFace).size());
 
 			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {1, 3}, {2, 3}, {2, 4}, {3, 4} };
@@ -386,7 +382,7 @@ namespace ConvexHull3DUnitTests {
 
 		TEST_METHOD(DelaunayTriangulationBasicTest4) {
 			std::vector<point<int>> pts = { {0, 0}, {0, 10}, {10, 0}, {10, 10} };
-			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
+			auto extFace = delaunayTriangulation(pts);
 			Assert::AreEqual(4, (int)faceToEdgeList(extFace).size());
 
 			std::pair<size_t, size_t> expectedEdges[] = { {0, 1}, {0, 2}, {1, 3}, {2, 3} };
@@ -413,12 +409,12 @@ namespace ConvexHull3DUnitTests {
 				}
 			}
 
-			std::shared_ptr<face<labeled_point<int, size_t>>> extFace = delaunayTriangulation(pts);
-			std::vector<std::shared_ptr<edge<labeled_point<int, size_t>>>> allEdges = exploreGraph(extFace->outerComponent()->origin());
+			auto extFace = delaunayTriangulation(pts);
+			auto allEdges = exploreGraph(extFace->outerComponent()->origin());
 			Assert::AreEqual(4 * gridSize * (gridSize - 1), (int)allEdges.size());
 
-			for (const std::shared_ptr<edge<labeled_point<int, size_t>>> theEdge : allEdges) {
-				std::shared_ptr<face<labeled_point<int, size_t>>> theFace = theEdge->incidentFace();
+			for (const auto& theEdge : allEdges) {
+				auto theFace = theEdge->incidentFace();
 				if (theFace == extFace) {
 					Assert::AreEqual(gridSize * 4 - 4, (int)faceToEdgeList(theFace).size());
 				}
